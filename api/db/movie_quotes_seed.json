@@ -1,0 +1,608 @@
+[
+  {
+    "movie": "Goodfellas",
+    "year": 1990,
+    "character": "Hannibal Lecter",
+    "quote": "To infinity... and beyond!"
+  },
+  {
+    "movie": "Star Wars: Episode IV - A New Hope",
+    "year": 1977,
+    "character": "Vincent Vega",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Dr. Alan Grant",
+    "quote": "Hold on to your butts."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Woody",
+    "quote": "Hold on to your butts."
+  },
+  {
+    "movie": "Forrest Gump",
+    "year": 1994,
+    "character": "Dr. Alan Grant",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "The Shawshank Redemption",
+    "year": 1994,
+    "character": "Forrest Gump",
+    "quote": "I feel the need\u2014the need for speed."
+  },
+  {
+    "movie": "Goodfellas",
+    "year": 1990,
+    "character": "Jack Dawson",
+    "quote": "They may take our lives, but they'll never take our freedom!"
+  },
+  {
+    "movie": "Forrest Gump",
+    "year": 1994,
+    "character": "Andy Dufresne",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Vito Corleone",
+    "quote": "I'm gonna make him an offer he can't refuse."
+  },
+  {
+    "movie": "The Shawshank Redemption",
+    "year": 1994,
+    "character": "Neo",
+    "quote": "Hakuna Matata!"
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "Vincent Vega",
+    "quote": "The first rule of Fight Club is: you do not talk about Fight Club."
+  },
+  {
+    "movie": "Jurassic Park",
+    "year": 1993,
+    "character": "Neo",
+    "quote": "Nobody puts Baby in a corner."
+  },
+  {
+    "movie": "Star Wars: Episode IV - A New Hope",
+    "year": 1977,
+    "character": "Simba",
+    "quote": "Say 'what' again. I dare you!"
+  },
+  {
+    "movie": "Toy Story",
+    "year": 1995,
+    "character": "Henry Hill",
+    "quote": "May the Force be with you."
+  },
+  {
+    "movie": "Back to the Future",
+    "year": 1985,
+    "character": "Vito Corleone",
+    "quote": "Here's looking at you, kid."
+  },
+  {
+    "movie": "Inception",
+    "year": 2010,
+    "character": "William Wallace",
+    "quote": "To infinity... and beyond!"
+  },
+  {
+    "movie": "Inception",
+    "year": 2010,
+    "character": "Dom Cobb",
+    "quote": "They may take our lives, but they'll never take our freedom!"
+  },
+  {
+    "movie": "The Lion King",
+    "year": 1994,
+    "character": "Vito Corleone",
+    "quote": "May the Force be with you."
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "Vito Corleone",
+    "quote": "I'm walking here! I'm walking here!"
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "Jack Dawson",
+    "quote": "To infinity... and beyond!"
+  },
+  {
+    "movie": "Gladiator",
+    "year": 2000,
+    "character": "Vito Corleone",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Jack Dawson",
+    "quote": "Keep your friends close, but your enemies closer."
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Henry Hill",
+    "quote": "Keep your friends close, but your enemies closer."
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "The Terminator",
+    "quote": "Get busy living, or get busy dying."
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "Hannibal Lecter",
+    "quote": "The first rule of Fight Club is: you do not talk about Fight Club."
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Andy Dufresne",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Neo",
+    "quote": "I feel the need\u2014the need for speed."
+  },
+  {
+    "movie": "Jurassic Park",
+    "year": 1993,
+    "character": "The Joker",
+    "quote": "As far back as I can remember, I always wanted to be a gangster."
+  },
+  {
+    "movie": "Forrest Gump",
+    "year": 1994,
+    "character": "Marty McFly",
+    "quote": "Are you not entertained?"
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Hannibal Lecter",
+    "quote": "Nobody puts Baby in a corner."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Andy Dufresne",
+    "quote": "Houston, we have a problem."
+  },
+  {
+    "movie": "Pulp Fiction",
+    "year": 1994,
+    "character": "Woody",
+    "quote": "You had me at 'hello'."
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Forrest Gump",
+    "quote": "A census taker once tried to test me. I ate his liver with some fava beans."
+  },
+  {
+    "movie": "The Silence of the Lambs",
+    "year": 1991,
+    "character": "Henry Hill",
+    "quote": "You're gonna need a bigger boat."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Vincent Vega",
+    "quote": "Life is like a box of chocolates."
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Henry Hill",
+    "quote": "Houston, we have a problem."
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Tyler Durden",
+    "quote": "You had me at 'hello'."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Dom Cobb",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "Pulp Fiction",
+    "year": 1994,
+    "character": "Jack Dawson",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "The Shawshank Redemption",
+    "year": 1994,
+    "character": "Luke Skywalker",
+    "quote": "You can't handle the truth!"
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "The Joker",
+    "quote": "Roads? Where we're going, we don't need roads."
+  },
+  {
+    "movie": "Inception",
+    "year": 2010,
+    "character": "Vito Corleone",
+    "quote": "You can't handle the truth!"
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Tyler Durden",
+    "quote": "Houston, we have a problem."
+  },
+  {
+    "movie": "Titanic",
+    "year": 1997,
+    "character": "Andy Dufresne",
+    "quote": "Get busy living, or get busy dying."
+  },
+  {
+    "movie": "Goodfellas",
+    "year": 1990,
+    "character": "Vito Corleone",
+    "quote": "May the Force be with you."
+  },
+  {
+    "movie": "Pulp Fiction",
+    "year": 1994,
+    "character": "Andy Dufresne",
+    "quote": "Hold on to your butts."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Maximus",
+    "quote": "I feel the need\u2014the need for speed."
+  },
+  {
+    "movie": "Toy Story",
+    "year": 1995,
+    "character": "Dr. Alan Grant",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "Toy Story",
+    "year": 1995,
+    "character": "The Terminator",
+    "quote": "To infinity... and beyond!"
+  },
+  {
+    "movie": "Jurassic Park",
+    "year": 1993,
+    "character": "The Terminator",
+    "quote": "May the Force be with you."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Dom Cobb",
+    "quote": "Get busy living, or get busy dying."
+  },
+  {
+    "movie": "Fight Club",
+    "year": 1999,
+    "character": "Hannibal Lecter",
+    "quote": "I feel the need\u2014the need for speed."
+  },
+  {
+    "movie": "Toy Story",
+    "year": 1995,
+    "character": "William Wallace",
+    "quote": "Are you not entertained?"
+  },
+  {
+    "movie": "Goodfellas",
+    "year": 1990,
+    "character": "Woody",
+    "quote": "I'm gonna make him an offer he can't refuse."
+  },
+  {
+    "movie": "The Lion King",
+    "year": 1994,
+    "character": "Maximus",
+    "quote": "Even the smallest person can change the course of the future."
+  },
+  {
+    "movie": "Inception",
+    "year": 2010,
+    "character": "Frodo Baggins",
+    "quote": "Get busy living, or get busy dying."
+  },
+  {
+    "movie": "The Silence of the Lambs",
+    "year": 1991,
+    "character": "Neo",
+    "quote": "Nobody puts Baby in a corner."
+  },
+  {
+    "movie": "Star Wars: Episode IV - A New Hope",
+    "year": 1977,
+    "character": "Marty McFly",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "Back to the Future",
+    "year": 1985,
+    "character": "Maximus",
+    "quote": "Houston, we have a problem."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Luke Skywalker",
+    "quote": "You had me at 'hello'."
+  },
+  {
+    "movie": "The Silence of the Lambs",
+    "year": 1991,
+    "character": "Simba",
+    "quote": "Hakuna Matata!"
+  },
+  {
+    "movie": "Back to the Future",
+    "year": 1985,
+    "character": "Marty McFly",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "Vito Corleone",
+    "quote": "Nobody puts Baby in a corner."
+  },
+  {
+    "movie": "Goodfellas",
+    "year": 1990,
+    "character": "Tyler Durden",
+    "quote": "I'm the king of the world!"
+  },
+  {
+    "movie": "The Dark Knight",
+    "year": 2008,
+    "character": "Maximus",
+    "quote": "Hakuna Matata!"
+  },
+  {
+    "movie": "Star Wars: Episode IV - A New Hope",
+    "year": 1977,
+    "character": "William Wallace",
+    "quote": "I'm walking here! I'm walking here!"
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "William Wallace",
+    "quote": "Get busy living, or get busy dying."
+  },
+  {
+    "movie": "Gladiator",
+    "year": 2000,
+    "character": "Simba",
+    "quote": "Hold on to your butts."
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "Tyler Durden",
+    "quote": "Life is like a box of chocolates."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Frodo Baggins",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "The Lion King",
+    "year": 1994,
+    "character": "Neo",
+    "quote": "Hakuna Matata!"
+  },
+  {
+    "movie": "The Silence of the Lambs",
+    "year": 1991,
+    "character": "Dom Cobb",
+    "quote": "May the Force be with you."
+  },
+  {
+    "movie": "Forrest Gump",
+    "year": 1994,
+    "character": "Luke Skywalker",
+    "quote": "You can't handle the truth!"
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Marty McFly",
+    "quote": "I'll be back."
+  },
+  {
+    "movie": "The Matrix",
+    "year": 1999,
+    "character": "Marty McFly",
+    "quote": "Here's looking at you, kid."
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "The Joker",
+    "quote": "I'll be back."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Vincent Vega",
+    "quote": "Are you not entertained?"
+  },
+  {
+    "movie": "Toy Story",
+    "year": 1995,
+    "character": "William Wallace",
+    "quote": "I'll be back."
+  },
+  {
+    "movie": "The Terminator",
+    "year": 1984,
+    "character": "Andy Dufresne",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "The Dark Knight",
+    "year": 2008,
+    "character": "Vincent Vega",
+    "quote": "I feel the need\u2014the need for speed."
+  },
+  {
+    "movie": "Jurassic Park",
+    "year": 1993,
+    "character": "Neo",
+    "quote": "As far back as I can remember, I always wanted to be a gangster."
+  },
+  {
+    "movie": "Back to the Future",
+    "year": 1985,
+    "character": "The Terminator",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "Star Wars: Episode IV - A New Hope",
+    "year": 1977,
+    "character": "Maximus",
+    "quote": "You mustn't be afraid to dream a little bigger, darling."
+  },
+  {
+    "movie": "Fight Club",
+    "year": 1999,
+    "character": "Woody",
+    "quote": "Here's looking at you, kid."
+  },
+  {
+    "movie": "The Silence of the Lambs",
+    "year": 1991,
+    "character": "Dr. Alan Grant",
+    "quote": "Say 'what' again. I dare you!"
+  },
+  {
+    "movie": "The Godfather",
+    "year": 1972,
+    "character": "Woody",
+    "quote": "To infinity... and beyond!"
+  },
+  {
+    "movie": "Forrest Gump",
+    "year": 1994,
+    "character": "Hannibal Lecter",
+    "quote": "Even the smallest person can change the course of the future."
+  },
+  {
+    "movie": "The Shawshank Redemption",
+    "year": 1994,
+    "character": "William Wallace",
+    "quote": "Hasta la vista, baby."
+  },
+  {
+    "movie": "Fight Club",
+    "year": 1999,
+    "character": "Hannibal Lecter",
+    "quote": "To infinity... and beyond!"
+  },
+  {
+    "movie": "Braveheart",
+    "year": 1995,
+    "character": "The Terminator",
+    "quote": "Nobody puts Baby in a corner."
+  },
+  {
+    "movie": "Goodfellas",
+    "year": 1990,
+    "character": "Dr. Alan Grant",
+    "quote": "As far back as I can remember, I always wanted to be a gangster."
+  },
+  {
+    "movie": "The Terminator",
+    "year": 1984,
+    "character": "Tyler Durden",
+    "quote": "Why so serious?"
+  },
+  {
+    "movie": "Gladiator",
+    "year": 2000,
+    "character": "Dom Cobb",
+    "quote": "Hasta la vista, baby."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Forrest Gump",
+    "quote": "There is no spoon."
+  },
+  {
+    "movie": "The Lord of the Rings: The Fellowship of the Ring",
+    "year": 2001,
+    "character": "Andy Dufresne",
+    "quote": "Hasta la vista, baby."
+  },
+  {
+    "movie": "Back to the Future",
+    "year": 1985,
+    "character": "Tyler Durden",
+    "quote": "I'm gonna make him an offer he can't refuse."
+  },
+  {
+    "movie": "The Dark Knight",
+    "year": 2008,
+    "character": "Hannibal Lecter",
+    "quote": "You're gonna need a bigger boat."
+  },
+  {
+    "movie": "The Dark Knight",
+    "year": 2008,
+    "character": "Hannibal Lecter",
+    "quote": "Houston, we have a problem."
+  },
+  {
+    "movie": "The Dark Knight",
+    "year": 2008,
+    "character": "Frodo Baggins",
+    "quote": "Get busy living, or get busy dying."
+  },
+  {
+    "movie": "Toy Story",
+    "year": 1995,
+    "character": "The Joker",
+    "quote": "Hakuna Matata!"
+  },
+  {
+    "movie": "Back to the Future",
+    "year": 1985,
+    "character": "William Wallace",
+    "quote": "Houston, we have a problem."
+  }
+]
