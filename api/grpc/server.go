@@ -8,6 +8,7 @@ import (
 	"api/ent"
 	quotespb "api/proto/quotespb"
 
+	"entgo.io/ent/dialect/sql"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -27,7 +28,7 @@ func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*qu
 		WithMovie().
 		WithCharacter().
 		Limit(1).
-		Order(ent.Desc("RANDOM()")).           // Randomize the order
+		Order(sql.OrderByRand()).           // Randomize the order
 		First(ctx)
 	if err != nil {
 		return nil, err
