@@ -6,6 +6,7 @@ import (
 	"api/ent/movie"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,6 +17,10 @@ type Movie struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Year holds the value of the "year" field.
@@ -28,17 +33,39 @@ type Movie struct {
 
 // MovieEdges holds the relations/edges for other nodes in the graph.
 type MovieEdges struct {
+	// Category holds the value of the category edge.
+	Category []*Category `json:"category,omitempty"`
+	// Characters holds the value of the characters edge.
+	Characters []*Character `json:"characters,omitempty"`
 	// Quotes holds the value of the quotes edge.
 	Quotes []*MovieQuote `json:"quotes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
+}
+
+// CategoryOrErr returns the Category value or an error if the edge
+// was not loaded in eager-loading.
+func (e MovieEdges) CategoryOrErr() ([]*Category, error) {
+	if e.loadedTypes[0] {
+		return e.Category, nil
+	}
+	return nil, &NotLoadedError{edge: "category"}
+}
+
+// CharactersOrErr returns the Characters value or an error if the edge
+// was not loaded in eager-loading.
+func (e MovieEdges) CharactersOrErr() ([]*Character, error) {
+	if e.loadedTypes[1] {
+		return e.Characters, nil
+	}
+	return nil, &NotLoadedError{edge: "characters"}
 }
 
 // QuotesOrErr returns the Quotes value or an error if the edge
 // was not loaded in eager-loading.
 func (e MovieEdges) QuotesOrErr() ([]*MovieQuote, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[2] {
 		return e.Quotes, nil
 	}
 	return nil, &NotLoadedError{edge: "quotes"}
@@ -53,6 +80,8 @@ func (*Movie) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case movie.FieldTitle:
 			values[i] = new(sql.NullString)
+		case movie.FieldCreatedAt, movie.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -74,6 +103,18 @@ func (m *Movie) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			m.ID = int(value.Int64)
+		case movie.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				m.CreatedAt = value.Time
+			}
+		case movie.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				m.UpdatedAt = value.Time
+			}
 		case movie.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -97,6 +138,16 @@ func (m *Movie) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (m *Movie) Value(name string) (ent.Value, error) {
 	return m.selectValues.Get(name)
+}
+
+// QueryCategory queries the "category" edge of the Movie entity.
+func (m *Movie) QueryCategory() *CategoryQuery {
+	return NewMovieClient(m.config).QueryCategory(m)
+}
+
+// QueryCharacters queries the "characters" edge of the Movie entity.
+func (m *Movie) QueryCharacters() *CharacterQuery {
+	return NewMovieClient(m.config).QueryCharacters(m)
 }
 
 // QueryQuotes queries the "quotes" edge of the Movie entity.
@@ -127,6 +178,12 @@ func (m *Movie) String() string {
 	var builder strings.Builder
 	builder.WriteString("Movie(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(m.Title)
 	builder.WriteString(", ")

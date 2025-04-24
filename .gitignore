@@ -53,5 +53,7 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
+# Environment variable files
 .env
 .env.production
+

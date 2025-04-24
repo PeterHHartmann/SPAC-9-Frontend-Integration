@@ -4,6 +4,7 @@ package moviequote
 
 import (
 	"api/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -54,9 +55,104 @@ func IDLTE(id int) predicate.MovieQuote {
 	return predicate.MovieQuote(sql.FieldLTE(FieldID, id))
 }
 
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
 // Quote applies equality check predicate on the "quote" field. It's identical to QuoteEQ.
 func Quote(v string) predicate.MovieQuote {
 	return predicate.MovieQuote(sql.FieldEQ(FieldQuote, v))
+}
+
+// Context applies equality check predicate on the "context" field. It's identical to ContextEQ.
+func Context(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEQ(FieldContext, v))
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldNEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldGT(FieldCreatedAt, v))
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldGTE(FieldCreatedAt, v))
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldLT(FieldCreatedAt, v))
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // QuoteEQ applies the EQ predicate on the "quote" field.
@@ -124,6 +220,71 @@ func QuoteContainsFold(v string) predicate.MovieQuote {
 	return predicate.MovieQuote(sql.FieldContainsFold(FieldQuote, v))
 }
 
+// ContextEQ applies the EQ predicate on the "context" field.
+func ContextEQ(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEQ(FieldContext, v))
+}
+
+// ContextNEQ applies the NEQ predicate on the "context" field.
+func ContextNEQ(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldNEQ(FieldContext, v))
+}
+
+// ContextIn applies the In predicate on the "context" field.
+func ContextIn(vs ...string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldIn(FieldContext, vs...))
+}
+
+// ContextNotIn applies the NotIn predicate on the "context" field.
+func ContextNotIn(vs ...string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldNotIn(FieldContext, vs...))
+}
+
+// ContextGT applies the GT predicate on the "context" field.
+func ContextGT(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldGT(FieldContext, v))
+}
+
+// ContextGTE applies the GTE predicate on the "context" field.
+func ContextGTE(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldGTE(FieldContext, v))
+}
+
+// ContextLT applies the LT predicate on the "context" field.
+func ContextLT(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldLT(FieldContext, v))
+}
+
+// ContextLTE applies the LTE predicate on the "context" field.
+func ContextLTE(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldLTE(FieldContext, v))
+}
+
+// ContextContains applies the Contains predicate on the "context" field.
+func ContextContains(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldContains(FieldContext, v))
+}
+
+// ContextHasPrefix applies the HasPrefix predicate on the "context" field.
+func ContextHasPrefix(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldHasPrefix(FieldContext, v))
+}
+
+// ContextHasSuffix applies the HasSuffix predicate on the "context" field.
+func ContextHasSuffix(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldHasSuffix(FieldContext, v))
+}
+
+// ContextEqualFold applies the EqualFold predicate on the "context" field.
+func ContextEqualFold(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldEqualFold(FieldContext, v))
+}
+
+// ContextContainsFold applies the ContainsFold predicate on the "context" field.
+func ContextContainsFold(v string) predicate.MovieQuote {
+	return predicate.MovieQuote(sql.FieldContainsFold(FieldContext, v))
+}
+
 // HasMovie applies the HasEdge predicate on the "movie" edge.
 func HasMovie() predicate.MovieQuote {
 	return predicate.MovieQuote(func(s *sql.Selector) {
@@ -147,21 +308,21 @@ func HasMovieWith(preds ...predicate.Movie) predicate.MovieQuote {
 	})
 }
 
-// HasCharacter applies the HasEdge predicate on the "character" edge.
-func HasCharacter() predicate.MovieQuote {
+// HasLanguage applies the HasEdge predicate on the "language" edge.
+func HasLanguage() predicate.MovieQuote {
 	return predicate.MovieQuote(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CharacterTable, CharacterColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, LanguageTable, LanguageColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasCharacterWith applies the HasEdge predicate on the "character" edge with a given conditions (other predicates).
-func HasCharacterWith(preds ...predicate.Character) predicate.MovieQuote {
+// HasLanguageWith applies the HasEdge predicate on the "language" edge with a given conditions (other predicates).
+func HasLanguageWith(preds ...predicate.Language) predicate.MovieQuote {
 	return predicate.MovieQuote(func(s *sql.Selector) {
-		step := newCharacterStep()
+		step := newLanguageStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

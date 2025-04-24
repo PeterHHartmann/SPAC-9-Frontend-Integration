@@ -4,8 +4,10 @@ package ent
 
 import (
 	"api/ent/character"
+	"api/ent/movie"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,30 +18,39 @@ type Character struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Actor holds the value of the "actor" field.
+	Actor string `json:"actor,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CharacterQuery when eager-loading is set.
-	Edges        CharacterEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges            CharacterEdges `json:"edges"`
+	movie_characters *int
+	selectValues     sql.SelectValues
 }
 
 // CharacterEdges holds the relations/edges for other nodes in the graph.
 type CharacterEdges struct {
-	// Quotes holds the value of the quotes edge.
-	Quotes []*MovieQuote `json:"quotes,omitempty"`
+	// Movie holds the value of the movie edge.
+	Movie *Movie `json:"movie,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// QuotesOrErr returns the Quotes value or an error if the edge
-// was not loaded in eager-loading.
-func (e CharacterEdges) QuotesOrErr() ([]*MovieQuote, error) {
-	if e.loadedTypes[0] {
-		return e.Quotes, nil
+// MovieOrErr returns the Movie value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CharacterEdges) MovieOrErr() (*Movie, error) {
+	if e.Movie != nil {
+		return e.Movie, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: movie.Label}
 	}
-	return nil, &NotLoadedError{edge: "quotes"}
+	return nil, &NotLoadedError{edge: "movie"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,8 +60,12 @@ func (*Character) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case character.FieldID:
 			values[i] = new(sql.NullInt64)
-		case character.FieldName:
+		case character.FieldName, character.FieldActor:
 			values[i] = new(sql.NullString)
+		case character.FieldCreatedAt, character.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case character.ForeignKeys[0]: // movie_characters
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -72,11 +87,36 @@ func (c *Character) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
+		case character.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				c.CreatedAt = value.Time
+			}
+		case character.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				c.UpdatedAt = value.Time
+			}
 		case character.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				c.Name = value.String
+			}
+		case character.FieldActor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field actor", values[i])
+			} else if value.Valid {
+				c.Actor = value.String
+			}
+		case character.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field movie_characters", value)
+			} else if value.Valid {
+				c.movie_characters = new(int)
+				*c.movie_characters = int(value.Int64)
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
@@ -91,9 +131,9 @@ func (c *Character) Value(name string) (ent.Value, error) {
 	return c.selectValues.Get(name)
 }
 
-// QueryQuotes queries the "quotes" edge of the Character entity.
-func (c *Character) QueryQuotes() *MovieQuoteQuery {
-	return NewCharacterClient(c.config).QueryQuotes(c)
+// QueryMovie queries the "movie" edge of the Character entity.
+func (c *Character) QueryMovie() *MovieQuery {
+	return NewCharacterClient(c.config).QueryMovie(c)
 }
 
 // Update returns a builder for updating this Character.
@@ -119,8 +159,17 @@ func (c *Character) String() string {
 	var builder strings.Builder
 	builder.WriteString("Character(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(c.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(c.Name)
+	builder.WriteString(", ")
+	builder.WriteString("actor=")
+	builder.WriteString(c.Actor)
 	builder.WriteByte(')')
 	return builder.String()
 }

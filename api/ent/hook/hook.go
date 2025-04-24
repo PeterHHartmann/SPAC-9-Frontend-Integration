@@ -8,6 +8,18 @@ import (
 	"fmt"
 )
 
+// The CategoryFunc type is an adapter to allow the use of ordinary
+// function as Category mutator.
+type CategoryFunc func(context.Context, *ent.CategoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CategoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CategoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CategoryMutation", m)
+}
+
 // The CharacterFunc type is an adapter to allow the use of ordinary
 // function as Character mutator.
 type CharacterFunc func(context.Context, *ent.CharacterMutation) (ent.Value, error)
@@ -18,6 +30,18 @@ func (f CharacterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CharacterMutation", m)
+}
+
+// The LanguageFunc type is an adapter to allow the use of ordinary
+// function as Language mutator.
+type LanguageFunc func(context.Context, *ent.LanguageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LanguageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LanguageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LanguageMutation", m)
 }
 
 // The MovieFunc type is an adapter to allow the use of ordinary

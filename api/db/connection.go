@@ -8,14 +8,26 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func getEnv(key, fallback string) string {
+    if value, ok := os.LookupEnv(key); ok {
+        return value
+    }
+    return fallback
+}
+
 //Gets connectionString for database from .env file or return default
 func GetConnectionString() string {
-	if os.Getenv("DEV_ENV") == "production" {
-		err := godotenv.Load("./../.env.production")
-		if err != nil {
-			log.Fatal(err)
-			log.Fatal("❌ Error loading .env.production file")
-		}
+	devenv := getEnv("DEV_ENV", "example")
+
+	env_file := fmt.Sprintf(
+		"./../.env.%s",
+		devenv,
+	)
+
+	err := godotenv.Load(env_file)
+	if err != nil {
+		log.Fatal(err)
+		log.Fatal("❌ Error loading .env file")
 	}
 
 	postgresDB := os.Getenv("POSTGRES_DB")
@@ -24,13 +36,12 @@ func GetConnectionString() string {
 	postgresPort := os.Getenv("POSTGRES_PORT")
 	postgresHost := os.Getenv("POSTGRES_HOST")
 
-	if postgresDB == "" || postgresUser == "" || postgresPassword == "" || postgresPort == "" || postgresHost == "" {
-		log.Println("⚠️ One or more environment variables are missing, using default fallback.")
-		return "host=localhost port=5432 user=exampleuser dbname=exampledb password=examplepwd sslmode=disable"
-	}
-
+	// return fmt.Sprintf(
+	// 	"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	// 	postgresHost, postgresPort, postgresUser, postgresPassword, postgresDB,
+	// )
 	return fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		postgresHost, postgresPort, postgresUser, postgresPassword, postgresDB,
+		"postgres://%s:%s@%s:%s/%s?search_path=public&sslmode=disable",
+		postgresUser, postgresPassword, postgresHost, postgresPort, postgresDB,
 	)
 }

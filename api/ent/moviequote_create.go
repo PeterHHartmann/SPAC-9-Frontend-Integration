@@ -3,12 +3,13 @@
 package ent
 
 import (
-	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,9 +22,43 @@ type MovieQuoteCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (mqc *MovieQuoteCreate) SetCreatedAt(t time.Time) *MovieQuoteCreate {
+	mqc.mutation.SetCreatedAt(t)
+	return mqc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (mqc *MovieQuoteCreate) SetNillableCreatedAt(t *time.Time) *MovieQuoteCreate {
+	if t != nil {
+		mqc.SetCreatedAt(*t)
+	}
+	return mqc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (mqc *MovieQuoteCreate) SetUpdatedAt(t time.Time) *MovieQuoteCreate {
+	mqc.mutation.SetUpdatedAt(t)
+	return mqc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (mqc *MovieQuoteCreate) SetNillableUpdatedAt(t *time.Time) *MovieQuoteCreate {
+	if t != nil {
+		mqc.SetUpdatedAt(*t)
+	}
+	return mqc
+}
+
 // SetQuote sets the "quote" field.
 func (mqc *MovieQuoteCreate) SetQuote(s string) *MovieQuoteCreate {
 	mqc.mutation.SetQuote(s)
+	return mqc
+}
+
+// SetContext sets the "context" field.
+func (mqc *MovieQuoteCreate) SetContext(s string) *MovieQuoteCreate {
+	mqc.mutation.SetContext(s)
 	return mqc
 }
 
@@ -33,20 +68,36 @@ func (mqc *MovieQuoteCreate) SetMovieID(id int) *MovieQuoteCreate {
 	return mqc
 }
 
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (mqc *MovieQuoteCreate) SetNillableMovieID(id *int) *MovieQuoteCreate {
+	if id != nil {
+		mqc = mqc.SetMovieID(*id)
+	}
+	return mqc
+}
+
 // SetMovie sets the "movie" edge to the Movie entity.
 func (mqc *MovieQuoteCreate) SetMovie(m *Movie) *MovieQuoteCreate {
 	return mqc.SetMovieID(m.ID)
 }
 
-// SetCharacterID sets the "character" edge to the Character entity by ID.
-func (mqc *MovieQuoteCreate) SetCharacterID(id int) *MovieQuoteCreate {
-	mqc.mutation.SetCharacterID(id)
+// SetLanguageID sets the "language" edge to the Language entity by ID.
+func (mqc *MovieQuoteCreate) SetLanguageID(id int) *MovieQuoteCreate {
+	mqc.mutation.SetLanguageID(id)
 	return mqc
 }
 
-// SetCharacter sets the "character" edge to the Character entity.
-func (mqc *MovieQuoteCreate) SetCharacter(c *Character) *MovieQuoteCreate {
-	return mqc.SetCharacterID(c.ID)
+// SetNillableLanguageID sets the "language" edge to the Language entity by ID if the given value is not nil.
+func (mqc *MovieQuoteCreate) SetNillableLanguageID(id *int) *MovieQuoteCreate {
+	if id != nil {
+		mqc = mqc.SetLanguageID(*id)
+	}
+	return mqc
+}
+
+// SetLanguage sets the "language" edge to the Language entity.
+func (mqc *MovieQuoteCreate) SetLanguage(l *Language) *MovieQuoteCreate {
+	return mqc.SetLanguageID(l.ID)
 }
 
 // Mutation returns the MovieQuoteMutation object of the builder.
@@ -56,6 +107,7 @@ func (mqc *MovieQuoteCreate) Mutation() *MovieQuoteMutation {
 
 // Save creates the MovieQuote in the database.
 func (mqc *MovieQuoteCreate) Save(ctx context.Context) (*MovieQuote, error) {
+	mqc.defaults()
 	return withHooks(ctx, mqc.sqlSave, mqc.mutation, mqc.hooks)
 }
 
@@ -81,8 +133,26 @@ func (mqc *MovieQuoteCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (mqc *MovieQuoteCreate) defaults() {
+	if _, ok := mqc.mutation.CreatedAt(); !ok {
+		v := moviequote.DefaultCreatedAt()
+		mqc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := mqc.mutation.UpdatedAt(); !ok {
+		v := moviequote.DefaultUpdatedAt()
+		mqc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mqc *MovieQuoteCreate) check() error {
+	if _, ok := mqc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "MovieQuote.created_at"`)}
+	}
+	if _, ok := mqc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "MovieQuote.updated_at"`)}
+	}
 	if _, ok := mqc.mutation.Quote(); !ok {
 		return &ValidationError{Name: "quote", err: errors.New(`ent: missing required field "MovieQuote.quote"`)}
 	}
@@ -91,11 +161,8 @@ func (mqc *MovieQuoteCreate) check() error {
 			return &ValidationError{Name: "quote", err: fmt.Errorf(`ent: validator failed for field "MovieQuote.quote": %w`, err)}
 		}
 	}
-	if len(mqc.mutation.MovieIDs()) == 0 {
-		return &ValidationError{Name: "movie", err: errors.New(`ent: missing required edge "MovieQuote.movie"`)}
-	}
-	if len(mqc.mutation.CharacterIDs()) == 0 {
-		return &ValidationError{Name: "character", err: errors.New(`ent: missing required edge "MovieQuote.character"`)}
+	if _, ok := mqc.mutation.Context(); !ok {
+		return &ValidationError{Name: "context", err: errors.New(`ent: missing required field "MovieQuote.context"`)}
 	}
 	return nil
 }
@@ -123,9 +190,21 @@ func (mqc *MovieQuoteCreate) createSpec() (*MovieQuote, *sqlgraph.CreateSpec) {
 		_node = &MovieQuote{config: mqc.config}
 		_spec = sqlgraph.NewCreateSpec(moviequote.Table, sqlgraph.NewFieldSpec(moviequote.FieldID, field.TypeInt))
 	)
+	if value, ok := mqc.mutation.CreatedAt(); ok {
+		_spec.SetField(moviequote.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := mqc.mutation.UpdatedAt(); ok {
+		_spec.SetField(moviequote.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := mqc.mutation.Quote(); ok {
 		_spec.SetField(moviequote.FieldQuote, field.TypeString, value)
 		_node.Quote = value
+	}
+	if value, ok := mqc.mutation.Context(); ok {
+		_spec.SetField(moviequote.FieldContext, field.TypeString, value)
+		_node.Context = value
 	}
 	if nodes := mqc.mutation.MovieIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -144,21 +223,21 @@ func (mqc *MovieQuoteCreate) createSpec() (*MovieQuote, *sqlgraph.CreateSpec) {
 		_node.movie_quotes = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mqc.mutation.CharacterIDs(); len(nodes) > 0 {
+	if nodes := mqc.mutation.LanguageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   moviequote.CharacterTable,
-			Columns: []string{moviequote.CharacterColumn},
+			Table:   moviequote.LanguageTable,
+			Columns: []string{moviequote.LanguageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(language.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.character_quotes = &nodes[0]
+		_node.language_quotes = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -182,6 +261,7 @@ func (mqcb *MovieQuoteCreateBulk) Save(ctx context.Context) ([]*MovieQuote, erro
 	for i := range mqcb.builders {
 		func(i int, root context.Context) {
 			builder := mqcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MovieQuoteMutation)
 				if !ok {

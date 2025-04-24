@@ -1,23 +1,29 @@
 package db
 
 import (
+	"api/ent"
+	"api/ent/category"
+	"api/ent/character"
+	"api/ent/language"
+	"api/ent/movie"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-
-	"api/ent"
-	"api/ent/character"
-	"api/ent/movie"
 )
 
-type SeedQuote struct {
-	Movie     string `json:"movie"`
-	Year      int    `json:"year"`
-	Character string `json:"character"`
+type JsonMovieQuote struct {
 	Quote     string `json:"quote"`
+	Movie     string `json:"movie"`
+	Character string `json:"character"`
+	Actor	  string `json:"actor"`
+	Category  string `json:"category"`
+	Year      int    `json:"year"`
+	Context   string `json:"context"`
+	Language  string `json:"language"`
 }
+
 
 func Seed(ctx context.Context, client *ent.Client) error {
 	log.Println("🌱 Checking if database needs seeding...")
@@ -31,88 +37,101 @@ func Seed(ctx context.Context, client *ent.Client) error {
 		return nil
 	}
 
-	file, err := os.Open("api/db/movie_quotes_seed.json")
+	file, err := os.Open("db/movie_quotes_seed.json")
 	if err != nil {
 		return fmt.Errorf("failed to open seed file: %w", err)
 	}
 	defer file.Close()
 
-	var quotes []SeedQuote
+	var quotes []JsonMovieQuote
 	if err := json.NewDecoder(file).Decode(&quotes); err != nil {
 		return fmt.Errorf("failed to decode seed file: %w", err)
 	}
 
-	log.Printf("📦 Seeding %d quotes...\n", len(quotes))
+	var bulkCreates []*ent.MovieQuoteCreate
 
-	tx, err := client.Tx(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to start transaction: %w", err)
-	}
-	defer func() {
+	for _, q := range quotes {
+
+		ct, err := client.Category.
+			Query(). 
+			Where(category.NameEQ(q.Category)). 
+			Only(ctx) 
 		if err != nil {
-			tx.Rollback()
-		}
-	}()
-
-	movieCache := make(map[string]*ent.Movie)
-	characterCache := make(map[string]*ent.Character)
-
-	const batchSize = 20
-	for i, q := range quotes {
-		mv, ok := movieCache[q.Movie]
-		if !ok {
-			mv, err = tx.Movie.
-				Query().
-				Where(movie.TitleEQ(q.Movie)).
-				Only(ctx)
-			if ent.IsNotFound(err) {
-				mv, err = tx.Movie.
-					Create().
-					SetTitle(q.Movie).
-					SetYear(q.Year).
-					Save(ctx)
-			}
+			ct, err = client.Category. 
+				Create(). 
+				SetName(q.Category). 
+				Save(ctx)
 			if err != nil {
-				return fmt.Errorf("movie error: %w", err)
+				log.Printf("Failed to create category: %v", err)
+				continue
 			}
-			movieCache[q.Movie] = mv
 		}
 
-		char, ok := characterCache[q.Character]
-		if !ok {
-			char, err = tx.Character.
-				Query().
-				Where(character.NameEQ(q.Character)).
-				Only(ctx)
-			if ent.IsNotFound(err) {
-				char, err = tx.Character.
-					Create().
-					SetName(q.Character).
-					Save(ctx)
-			}
+		// Fetch or create Movie
+		mv, err := client.Movie.
+			Query().
+			Where(movie.TitleEQ(q.Movie)).
+			Only(ctx)
+		if err != nil {
+			mv, err = client.Movie.
+				Create().
+				SetTitle(q.Movie).
+				SetYear(q.Year).
+				AddCategory(ct).
+				Save(ctx)
 			if err != nil {
-				return fmt.Errorf("character error: %w", err)
+				log.Printf("Failed to create movie: %v", err)
+				continue
 			}
-			characterCache[q.Character] = char
 		}
 
-		_, err = tx.MovieQuote.
+		// Fetch or create Character
+		_, err = client.Character.
+			Query().
+			Where(character.NameEQ(q.Character)).
+			Only(ctx)
+		if err != nil {
+			_, err = client.Character.
+				Create().
+				SetName(q.Character).
+				SetActor(q.Actor).
+				SetMovie(mv).
+				Save(ctx)
+			if err != nil {
+				log.Printf("Failed to create character: %v", err)
+				continue
+			}
+		}
+
+		// Fetch or create Language
+		lang, err := client.Language.
+			Query().
+			Where(language.NameEQ(q.Language)).
+			Only(ctx)
+		if err != nil {
+			lang, err = client.Language.
+				Create().
+				SetName(q.Language).
+				Save(ctx)
+			if err != nil {
+				log.Printf("Failed to create Language: %v", err)
+				continue
+			}
+		}
+
+		// Build MovieQuote entry
+		create := client.MovieQuote.
 			Create().
 			SetQuote(q.Quote).
+			SetContext(q.Context).
 			SetMovie(mv).
-			SetCharacter(char).
-			Save(ctx)
-		if err != nil {
-			return fmt.Errorf("quote error: %w", err)
-		}
+			SetLanguage(lang)
 
-		if (i+1)%batchSize == 0 {
-			log.Printf("📈 Inserted %d/%d quotes...", i+1, len(quotes))
-		}
+		bulkCreates = append(bulkCreates, create)
 	}
 
-	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+	if _, err := client.MovieQuote.CreateBulk(bulkCreates...).Save(ctx); err != nil {
+		return fmt.Errorf("failed to create movie quotes: %w", err)
 	}
 
 	log.Println("✅ Seeding complete.")

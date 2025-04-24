@@ -3,7 +3,9 @@
 package ent
 
 import (
+	"api/ent/category"
 	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"api/ent/predicate"
@@ -11,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -25,10 +28,539 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeCategory   = "Category"
 	TypeCharacter  = "Character"
+	TypeLanguage   = "Language"
 	TypeMovie      = "Movie"
 	TypeMovieQuote = "MovieQuote"
 )
+
+// CategoryMutation represents an operation that mutates the Category nodes in the graph.
+type CategoryMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	name          *string
+	clearedFields map[string]struct{}
+	movies        map[int]struct{}
+	removedmovies map[int]struct{}
+	clearedmovies bool
+	done          bool
+	oldValue      func(context.Context) (*Category, error)
+	predicates    []predicate.Category
+}
+
+var _ ent.Mutation = (*CategoryMutation)(nil)
+
+// categoryOption allows management of the mutation configuration using functional options.
+type categoryOption func(*CategoryMutation)
+
+// newCategoryMutation creates new mutation for the Category entity.
+func newCategoryMutation(c config, op Op, opts ...categoryOption) *CategoryMutation {
+	m := &CategoryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCategory,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCategoryID sets the ID field of the mutation.
+func withCategoryID(id int) categoryOption {
+	return func(m *CategoryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Category
+		)
+		m.oldValue = func(ctx context.Context) (*Category, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Category.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCategory sets the old Category of the mutation.
+func withCategory(node *Category) categoryOption {
+	return func(m *CategoryMutation) {
+		m.oldValue = func(context.Context) (*Category, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CategoryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CategoryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CategoryMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CategoryMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Category.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CategoryMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CategoryMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CategoryMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CategoryMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CategoryMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CategoryMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetName sets the "name" field.
+func (m *CategoryMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CategoryMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CategoryMutation) ResetName() {
+	m.name = nil
+}
+
+// AddMovieIDs adds the "movies" edge to the Movie entity by ids.
+func (m *CategoryMutation) AddMovieIDs(ids ...int) {
+	if m.movies == nil {
+		m.movies = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.movies[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMovies clears the "movies" edge to the Movie entity.
+func (m *CategoryMutation) ClearMovies() {
+	m.clearedmovies = true
+}
+
+// MoviesCleared reports if the "movies" edge to the Movie entity was cleared.
+func (m *CategoryMutation) MoviesCleared() bool {
+	return m.clearedmovies
+}
+
+// RemoveMovieIDs removes the "movies" edge to the Movie entity by IDs.
+func (m *CategoryMutation) RemoveMovieIDs(ids ...int) {
+	if m.removedmovies == nil {
+		m.removedmovies = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.movies, ids[i])
+		m.removedmovies[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMovies returns the removed IDs of the "movies" edge to the Movie entity.
+func (m *CategoryMutation) RemovedMoviesIDs() (ids []int) {
+	for id := range m.removedmovies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MoviesIDs returns the "movies" edge IDs in the mutation.
+func (m *CategoryMutation) MoviesIDs() (ids []int) {
+	for id := range m.movies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMovies resets all changes to the "movies" edge.
+func (m *CategoryMutation) ResetMovies() {
+	m.movies = nil
+	m.clearedmovies = false
+	m.removedmovies = nil
+}
+
+// Where appends a list predicates to the CategoryMutation builder.
+func (m *CategoryMutation) Where(ps ...predicate.Category) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CategoryMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CategoryMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Category, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CategoryMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CategoryMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Category).
+func (m *CategoryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CategoryMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.created_at != nil {
+		fields = append(fields, category.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, category.FieldUpdatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, category.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case category.FieldCreatedAt:
+		return m.CreatedAt()
+	case category.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case category.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CategoryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case category.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case category.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case category.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Category field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CategoryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case category.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case category.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case category.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Category field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CategoryMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CategoryMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CategoryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Category numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CategoryMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CategoryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CategoryMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Category nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CategoryMutation) ResetField(name string) error {
+	switch name {
+	case category.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case category.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case category.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Category field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CategoryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.movies != nil {
+		edges = append(edges, category.EdgeMovies)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CategoryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case category.EdgeMovies:
+		ids := make([]ent.Value, 0, len(m.movies))
+		for id := range m.movies {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CategoryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedmovies != nil {
+		edges = append(edges, category.EdgeMovies)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CategoryMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case category.EdgeMovies:
+		ids := make([]ent.Value, 0, len(m.removedmovies))
+		for id := range m.removedmovies {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CategoryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedmovies {
+		edges = append(edges, category.EdgeMovies)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CategoryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case category.EdgeMovies:
+		return m.clearedmovies
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CategoryMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Category unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CategoryMutation) ResetEdge(name string) error {
+	switch name {
+	case category.EdgeMovies:
+		m.ResetMovies()
+		return nil
+	}
+	return fmt.Errorf("unknown Category edge %s", name)
+}
 
 // CharacterMutation represents an operation that mutates the Character nodes in the graph.
 type CharacterMutation struct {
@@ -36,11 +568,13 @@ type CharacterMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
 	name          *string
+	actor         *string
 	clearedFields map[string]struct{}
-	quotes        map[int]struct{}
-	removedquotes map[int]struct{}
-	clearedquotes bool
+	movie         *int
+	clearedmovie  bool
 	done          bool
 	oldValue      func(context.Context) (*Character, error)
 	predicates    []predicate.Character
@@ -144,6 +678,78 @@ func (m *CharacterMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *CharacterMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CharacterMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Character entity.
+// If the Character object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CharacterMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CharacterMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CharacterMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CharacterMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Character entity.
+// If the Character object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CharacterMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CharacterMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // SetName sets the "name" field.
 func (m *CharacterMutation) SetName(s string) {
 	m.name = &s
@@ -180,58 +786,79 @@ func (m *CharacterMutation) ResetName() {
 	m.name = nil
 }
 
-// AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by ids.
-func (m *CharacterMutation) AddQuoteIDs(ids ...int) {
-	if m.quotes == nil {
-		m.quotes = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.quotes[ids[i]] = struct{}{}
-	}
+// SetActor sets the "actor" field.
+func (m *CharacterMutation) SetActor(s string) {
+	m.actor = &s
 }
 
-// ClearQuotes clears the "quotes" edge to the MovieQuote entity.
-func (m *CharacterMutation) ClearQuotes() {
-	m.clearedquotes = true
-}
-
-// QuotesCleared reports if the "quotes" edge to the MovieQuote entity was cleared.
-func (m *CharacterMutation) QuotesCleared() bool {
-	return m.clearedquotes
-}
-
-// RemoveQuoteIDs removes the "quotes" edge to the MovieQuote entity by IDs.
-func (m *CharacterMutation) RemoveQuoteIDs(ids ...int) {
-	if m.removedquotes == nil {
-		m.removedquotes = make(map[int]struct{})
+// Actor returns the value of the "actor" field in the mutation.
+func (m *CharacterMutation) Actor() (r string, exists bool) {
+	v := m.actor
+	if v == nil {
+		return
 	}
-	for i := range ids {
-		delete(m.quotes, ids[i])
-		m.removedquotes[ids[i]] = struct{}{}
-	}
+	return *v, true
 }
 
-// RemovedQuotes returns the removed IDs of the "quotes" edge to the MovieQuote entity.
-func (m *CharacterMutation) RemovedQuotesIDs() (ids []int) {
-	for id := range m.removedquotes {
-		ids = append(ids, id)
+// OldActor returns the old "actor" field's value of the Character entity.
+// If the Character object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CharacterMutation) OldActor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActor: %w", err)
+	}
+	return oldValue.Actor, nil
+}
+
+// ResetActor resets all changes to the "actor" field.
+func (m *CharacterMutation) ResetActor() {
+	m.actor = nil
+}
+
+// SetMovieID sets the "movie" edge to the Movie entity by id.
+func (m *CharacterMutation) SetMovieID(id int) {
+	m.movie = &id
+}
+
+// ClearMovie clears the "movie" edge to the Movie entity.
+func (m *CharacterMutation) ClearMovie() {
+	m.clearedmovie = true
+}
+
+// MovieCleared reports if the "movie" edge to the Movie entity was cleared.
+func (m *CharacterMutation) MovieCleared() bool {
+	return m.clearedmovie
+}
+
+// MovieID returns the "movie" edge ID in the mutation.
+func (m *CharacterMutation) MovieID() (id int, exists bool) {
+	if m.movie != nil {
+		return *m.movie, true
 	}
 	return
 }
 
-// QuotesIDs returns the "quotes" edge IDs in the mutation.
-func (m *CharacterMutation) QuotesIDs() (ids []int) {
-	for id := range m.quotes {
-		ids = append(ids, id)
+// MovieIDs returns the "movie" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MovieID instead. It exists only for internal usage by the builders.
+func (m *CharacterMutation) MovieIDs() (ids []int) {
+	if id := m.movie; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetQuotes resets all changes to the "quotes" edge.
-func (m *CharacterMutation) ResetQuotes() {
-	m.quotes = nil
-	m.clearedquotes = false
-	m.removedquotes = nil
+// ResetMovie resets all changes to the "movie" edge.
+func (m *CharacterMutation) ResetMovie() {
+	m.movie = nil
+	m.clearedmovie = false
 }
 
 // Where appends a list predicates to the CharacterMutation builder.
@@ -268,9 +895,18 @@ func (m *CharacterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CharacterMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, character.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, character.FieldUpdatedAt)
+	}
 	if m.name != nil {
 		fields = append(fields, character.FieldName)
+	}
+	if m.actor != nil {
+		fields = append(fields, character.FieldActor)
 	}
 	return fields
 }
@@ -280,8 +916,14 @@ func (m *CharacterMutation) Fields() []string {
 // schema.
 func (m *CharacterMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case character.FieldCreatedAt:
+		return m.CreatedAt()
+	case character.FieldUpdatedAt:
+		return m.UpdatedAt()
 	case character.FieldName:
 		return m.Name()
+	case character.FieldActor:
+		return m.Actor()
 	}
 	return nil, false
 }
@@ -291,8 +933,14 @@ func (m *CharacterMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *CharacterMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case character.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case character.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	case character.FieldName:
 		return m.OldName(ctx)
+	case character.FieldActor:
+		return m.OldActor(ctx)
 	}
 	return nil, fmt.Errorf("unknown Character field %s", name)
 }
@@ -302,12 +950,33 @@ func (m *CharacterMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *CharacterMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case character.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case character.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
 	case character.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case character.FieldActor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActor(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Character field %s", name)
@@ -358,8 +1027,17 @@ func (m *CharacterMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *CharacterMutation) ResetField(name string) error {
 	switch name {
+	case character.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case character.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
 	case character.FieldName:
 		m.ResetName()
+		return nil
+	case character.FieldActor:
+		m.ResetActor()
 		return nil
 	}
 	return fmt.Errorf("unknown Character field %s", name)
@@ -368,8 +1046,8 @@ func (m *CharacterMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CharacterMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.quotes != nil {
-		edges = append(edges, character.EdgeQuotes)
+	if m.movie != nil {
+		edges = append(edges, character.EdgeMovie)
 	}
 	return edges
 }
@@ -378,7 +1056,524 @@ func (m *CharacterMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *CharacterMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case character.EdgeQuotes:
+	case character.EdgeMovie:
+		if id := m.movie; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CharacterMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CharacterMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CharacterMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedmovie {
+		edges = append(edges, character.EdgeMovie)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CharacterMutation) EdgeCleared(name string) bool {
+	switch name {
+	case character.EdgeMovie:
+		return m.clearedmovie
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CharacterMutation) ClearEdge(name string) error {
+	switch name {
+	case character.EdgeMovie:
+		m.ClearMovie()
+		return nil
+	}
+	return fmt.Errorf("unknown Character unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CharacterMutation) ResetEdge(name string) error {
+	switch name {
+	case character.EdgeMovie:
+		m.ResetMovie()
+		return nil
+	}
+	return fmt.Errorf("unknown Character edge %s", name)
+}
+
+// LanguageMutation represents an operation that mutates the Language nodes in the graph.
+type LanguageMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	name          *string
+	clearedFields map[string]struct{}
+	quotes        map[int]struct{}
+	removedquotes map[int]struct{}
+	clearedquotes bool
+	done          bool
+	oldValue      func(context.Context) (*Language, error)
+	predicates    []predicate.Language
+}
+
+var _ ent.Mutation = (*LanguageMutation)(nil)
+
+// languageOption allows management of the mutation configuration using functional options.
+type languageOption func(*LanguageMutation)
+
+// newLanguageMutation creates new mutation for the Language entity.
+func newLanguageMutation(c config, op Op, opts ...languageOption) *LanguageMutation {
+	m := &LanguageMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeLanguage,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withLanguageID sets the ID field of the mutation.
+func withLanguageID(id int) languageOption {
+	return func(m *LanguageMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Language
+		)
+		m.oldValue = func(ctx context.Context) (*Language, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Language.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withLanguage sets the old Language of the mutation.
+func withLanguage(node *Language) languageOption {
+	return func(m *LanguageMutation) {
+		m.oldValue = func(context.Context) (*Language, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m LanguageMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m LanguageMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *LanguageMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *LanguageMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Language.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *LanguageMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *LanguageMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Language entity.
+// If the Language object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LanguageMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *LanguageMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *LanguageMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *LanguageMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Language entity.
+// If the Language object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LanguageMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *LanguageMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetName sets the "name" field.
+func (m *LanguageMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *LanguageMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Language entity.
+// If the Language object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LanguageMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *LanguageMutation) ResetName() {
+	m.name = nil
+}
+
+// AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by ids.
+func (m *LanguageMutation) AddQuoteIDs(ids ...int) {
+	if m.quotes == nil {
+		m.quotes = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.quotes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearQuotes clears the "quotes" edge to the MovieQuote entity.
+func (m *LanguageMutation) ClearQuotes() {
+	m.clearedquotes = true
+}
+
+// QuotesCleared reports if the "quotes" edge to the MovieQuote entity was cleared.
+func (m *LanguageMutation) QuotesCleared() bool {
+	return m.clearedquotes
+}
+
+// RemoveQuoteIDs removes the "quotes" edge to the MovieQuote entity by IDs.
+func (m *LanguageMutation) RemoveQuoteIDs(ids ...int) {
+	if m.removedquotes == nil {
+		m.removedquotes = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.quotes, ids[i])
+		m.removedquotes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedQuotes returns the removed IDs of the "quotes" edge to the MovieQuote entity.
+func (m *LanguageMutation) RemovedQuotesIDs() (ids []int) {
+	for id := range m.removedquotes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// QuotesIDs returns the "quotes" edge IDs in the mutation.
+func (m *LanguageMutation) QuotesIDs() (ids []int) {
+	for id := range m.quotes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetQuotes resets all changes to the "quotes" edge.
+func (m *LanguageMutation) ResetQuotes() {
+	m.quotes = nil
+	m.clearedquotes = false
+	m.removedquotes = nil
+}
+
+// Where appends a list predicates to the LanguageMutation builder.
+func (m *LanguageMutation) Where(ps ...predicate.Language) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the LanguageMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *LanguageMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Language, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *LanguageMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *LanguageMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Language).
+func (m *LanguageMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *LanguageMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.created_at != nil {
+		fields = append(fields, language.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, language.FieldUpdatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, language.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *LanguageMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case language.FieldCreatedAt:
+		return m.CreatedAt()
+	case language.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case language.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *LanguageMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case language.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case language.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case language.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Language field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LanguageMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case language.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case language.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case language.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Language field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *LanguageMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *LanguageMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *LanguageMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Language numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *LanguageMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *LanguageMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *LanguageMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Language nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *LanguageMutation) ResetField(name string) error {
+	switch name {
+	case language.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case language.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case language.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Language field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *LanguageMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.quotes != nil {
+		edges = append(edges, language.EdgeQuotes)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *LanguageMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case language.EdgeQuotes:
 		ids := make([]ent.Value, 0, len(m.quotes))
 		for id := range m.quotes {
 			ids = append(ids, id)
@@ -389,19 +1584,19 @@ func (m *CharacterMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *CharacterMutation) RemovedEdges() []string {
+func (m *LanguageMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.removedquotes != nil {
-		edges = append(edges, character.EdgeQuotes)
+		edges = append(edges, language.EdgeQuotes)
 	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *CharacterMutation) RemovedIDs(name string) []ent.Value {
+func (m *LanguageMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case character.EdgeQuotes:
+	case language.EdgeQuotes:
 		ids := make([]ent.Value, 0, len(m.removedquotes))
 		for id := range m.removedquotes {
 			ids = append(ids, id)
@@ -412,19 +1607,19 @@ func (m *CharacterMutation) RemovedIDs(name string) []ent.Value {
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *CharacterMutation) ClearedEdges() []string {
+func (m *LanguageMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.clearedquotes {
-		edges = append(edges, character.EdgeQuotes)
+		edges = append(edges, language.EdgeQuotes)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *CharacterMutation) EdgeCleared(name string) bool {
+func (m *LanguageMutation) EdgeCleared(name string) bool {
 	switch name {
-	case character.EdgeQuotes:
+	case language.EdgeQuotes:
 		return m.clearedquotes
 	}
 	return false
@@ -432,39 +1627,47 @@ func (m *CharacterMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *CharacterMutation) ClearEdge(name string) error {
+func (m *LanguageMutation) ClearEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Character unique edge %s", name)
+	return fmt.Errorf("unknown Language unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *CharacterMutation) ResetEdge(name string) error {
+func (m *LanguageMutation) ResetEdge(name string) error {
 	switch name {
-	case character.EdgeQuotes:
+	case language.EdgeQuotes:
 		m.ResetQuotes()
 		return nil
 	}
-	return fmt.Errorf("unknown Character edge %s", name)
+	return fmt.Errorf("unknown Language edge %s", name)
 }
 
 // MovieMutation represents an operation that mutates the Movie nodes in the graph.
 type MovieMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	title         *string
-	year          *int
-	addyear       *int
-	clearedFields map[string]struct{}
-	quotes        map[int]struct{}
-	removedquotes map[int]struct{}
-	clearedquotes bool
-	done          bool
-	oldValue      func(context.Context) (*Movie, error)
-	predicates    []predicate.Movie
+	op                Op
+	typ               string
+	id                *int
+	created_at        *time.Time
+	updated_at        *time.Time
+	title             *string
+	year              *int
+	addyear           *int
+	clearedFields     map[string]struct{}
+	category          map[int]struct{}
+	removedcategory   map[int]struct{}
+	clearedcategory   bool
+	characters        map[int]struct{}
+	removedcharacters map[int]struct{}
+	clearedcharacters bool
+	quotes            map[int]struct{}
+	removedquotes     map[int]struct{}
+	clearedquotes     bool
+	done              bool
+	oldValue          func(context.Context) (*Movie, error)
+	predicates        []predicate.Movie
 }
 
 var _ ent.Mutation = (*MovieMutation)(nil)
@@ -565,6 +1768,78 @@ func (m *MovieMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *MovieMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *MovieMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *MovieMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *MovieMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *MovieMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *MovieMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // SetTitle sets the "title" field.
 func (m *MovieMutation) SetTitle(s string) {
 	m.title = &s
@@ -657,6 +1932,114 @@ func (m *MovieMutation) ResetYear() {
 	m.addyear = nil
 }
 
+// AddCategoryIDs adds the "category" edge to the Category entity by ids.
+func (m *MovieMutation) AddCategoryIDs(ids ...int) {
+	if m.category == nil {
+		m.category = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.category[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCategory clears the "category" edge to the Category entity.
+func (m *MovieMutation) ClearCategory() {
+	m.clearedcategory = true
+}
+
+// CategoryCleared reports if the "category" edge to the Category entity was cleared.
+func (m *MovieMutation) CategoryCleared() bool {
+	return m.clearedcategory
+}
+
+// RemoveCategoryIDs removes the "category" edge to the Category entity by IDs.
+func (m *MovieMutation) RemoveCategoryIDs(ids ...int) {
+	if m.removedcategory == nil {
+		m.removedcategory = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.category, ids[i])
+		m.removedcategory[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCategory returns the removed IDs of the "category" edge to the Category entity.
+func (m *MovieMutation) RemovedCategoryIDs() (ids []int) {
+	for id := range m.removedcategory {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CategoryIDs returns the "category" edge IDs in the mutation.
+func (m *MovieMutation) CategoryIDs() (ids []int) {
+	for id := range m.category {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCategory resets all changes to the "category" edge.
+func (m *MovieMutation) ResetCategory() {
+	m.category = nil
+	m.clearedcategory = false
+	m.removedcategory = nil
+}
+
+// AddCharacterIDs adds the "characters" edge to the Character entity by ids.
+func (m *MovieMutation) AddCharacterIDs(ids ...int) {
+	if m.characters == nil {
+		m.characters = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.characters[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCharacters clears the "characters" edge to the Character entity.
+func (m *MovieMutation) ClearCharacters() {
+	m.clearedcharacters = true
+}
+
+// CharactersCleared reports if the "characters" edge to the Character entity was cleared.
+func (m *MovieMutation) CharactersCleared() bool {
+	return m.clearedcharacters
+}
+
+// RemoveCharacterIDs removes the "characters" edge to the Character entity by IDs.
+func (m *MovieMutation) RemoveCharacterIDs(ids ...int) {
+	if m.removedcharacters == nil {
+		m.removedcharacters = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.characters, ids[i])
+		m.removedcharacters[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCharacters returns the removed IDs of the "characters" edge to the Character entity.
+func (m *MovieMutation) RemovedCharactersIDs() (ids []int) {
+	for id := range m.removedcharacters {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CharactersIDs returns the "characters" edge IDs in the mutation.
+func (m *MovieMutation) CharactersIDs() (ids []int) {
+	for id := range m.characters {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCharacters resets all changes to the "characters" edge.
+func (m *MovieMutation) ResetCharacters() {
+	m.characters = nil
+	m.clearedcharacters = false
+	m.removedcharacters = nil
+}
+
 // AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by ids.
 func (m *MovieMutation) AddQuoteIDs(ids ...int) {
 	if m.quotes == nil {
@@ -745,7 +2128,13 @@ func (m *MovieMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MovieMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, movie.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, movie.FieldUpdatedAt)
+	}
 	if m.title != nil {
 		fields = append(fields, movie.FieldTitle)
 	}
@@ -760,6 +2149,10 @@ func (m *MovieMutation) Fields() []string {
 // schema.
 func (m *MovieMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case movie.FieldCreatedAt:
+		return m.CreatedAt()
+	case movie.FieldUpdatedAt:
+		return m.UpdatedAt()
 	case movie.FieldTitle:
 		return m.Title()
 	case movie.FieldYear:
@@ -773,6 +2166,10 @@ func (m *MovieMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *MovieMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case movie.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case movie.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	case movie.FieldTitle:
 		return m.OldTitle(ctx)
 	case movie.FieldYear:
@@ -786,6 +2183,20 @@ func (m *MovieMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *MovieMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case movie.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case movie.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
 	case movie.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -864,6 +2275,12 @@ func (m *MovieMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *MovieMutation) ResetField(name string) error {
 	switch name {
+	case movie.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case movie.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
 	case movie.FieldTitle:
 		m.ResetTitle()
 		return nil
@@ -876,7 +2293,13 @@ func (m *MovieMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MovieMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.category != nil {
+		edges = append(edges, movie.EdgeCategory)
+	}
+	if m.characters != nil {
+		edges = append(edges, movie.EdgeCharacters)
+	}
 	if m.quotes != nil {
 		edges = append(edges, movie.EdgeQuotes)
 	}
@@ -887,6 +2310,18 @@ func (m *MovieMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *MovieMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case movie.EdgeCategory:
+		ids := make([]ent.Value, 0, len(m.category))
+		for id := range m.category {
+			ids = append(ids, id)
+		}
+		return ids
+	case movie.EdgeCharacters:
+		ids := make([]ent.Value, 0, len(m.characters))
+		for id := range m.characters {
+			ids = append(ids, id)
+		}
+		return ids
 	case movie.EdgeQuotes:
 		ids := make([]ent.Value, 0, len(m.quotes))
 		for id := range m.quotes {
@@ -899,7 +2334,13 @@ func (m *MovieMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MovieMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.removedcategory != nil {
+		edges = append(edges, movie.EdgeCategory)
+	}
+	if m.removedcharacters != nil {
+		edges = append(edges, movie.EdgeCharacters)
+	}
 	if m.removedquotes != nil {
 		edges = append(edges, movie.EdgeQuotes)
 	}
@@ -910,6 +2351,18 @@ func (m *MovieMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *MovieMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case movie.EdgeCategory:
+		ids := make([]ent.Value, 0, len(m.removedcategory))
+		for id := range m.removedcategory {
+			ids = append(ids, id)
+		}
+		return ids
+	case movie.EdgeCharacters:
+		ids := make([]ent.Value, 0, len(m.removedcharacters))
+		for id := range m.removedcharacters {
+			ids = append(ids, id)
+		}
+		return ids
 	case movie.EdgeQuotes:
 		ids := make([]ent.Value, 0, len(m.removedquotes))
 		for id := range m.removedquotes {
@@ -922,7 +2375,13 @@ func (m *MovieMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MovieMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.clearedcategory {
+		edges = append(edges, movie.EdgeCategory)
+	}
+	if m.clearedcharacters {
+		edges = append(edges, movie.EdgeCharacters)
+	}
 	if m.clearedquotes {
 		edges = append(edges, movie.EdgeQuotes)
 	}
@@ -933,6 +2392,10 @@ func (m *MovieMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *MovieMutation) EdgeCleared(name string) bool {
 	switch name {
+	case movie.EdgeCategory:
+		return m.clearedcategory
+	case movie.EdgeCharacters:
+		return m.clearedcharacters
 	case movie.EdgeQuotes:
 		return m.clearedquotes
 	}
@@ -951,6 +2414,12 @@ func (m *MovieMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *MovieMutation) ResetEdge(name string) error {
 	switch name {
+	case movie.EdgeCategory:
+		m.ResetCategory()
+		return nil
+	case movie.EdgeCharacters:
+		m.ResetCharacters()
+		return nil
 	case movie.EdgeQuotes:
 		m.ResetQuotes()
 		return nil
@@ -961,18 +2430,21 @@ func (m *MovieMutation) ResetEdge(name string) error {
 // MovieQuoteMutation represents an operation that mutates the MovieQuote nodes in the graph.
 type MovieQuoteMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	quote            *string
-	clearedFields    map[string]struct{}
-	movie            *int
-	clearedmovie     bool
-	character        *int
-	clearedcharacter bool
-	done             bool
-	oldValue         func(context.Context) (*MovieQuote, error)
-	predicates       []predicate.MovieQuote
+	op              Op
+	typ             string
+	id              *int
+	created_at      *time.Time
+	updated_at      *time.Time
+	quote           *string
+	context         *string
+	clearedFields   map[string]struct{}
+	movie           *int
+	clearedmovie    bool
+	language        *int
+	clearedlanguage bool
+	done            bool
+	oldValue        func(context.Context) (*MovieQuote, error)
+	predicates      []predicate.MovieQuote
 }
 
 var _ ent.Mutation = (*MovieQuoteMutation)(nil)
@@ -1073,6 +2545,78 @@ func (m *MovieQuoteMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *MovieQuoteMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *MovieQuoteMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the MovieQuote entity.
+// If the MovieQuote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieQuoteMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *MovieQuoteMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *MovieQuoteMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *MovieQuoteMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the MovieQuote entity.
+// If the MovieQuote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieQuoteMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *MovieQuoteMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // SetQuote sets the "quote" field.
 func (m *MovieQuoteMutation) SetQuote(s string) {
 	m.quote = &s
@@ -1107,6 +2651,42 @@ func (m *MovieQuoteMutation) OldQuote(ctx context.Context) (v string, err error)
 // ResetQuote resets all changes to the "quote" field.
 func (m *MovieQuoteMutation) ResetQuote() {
 	m.quote = nil
+}
+
+// SetContext sets the "context" field.
+func (m *MovieQuoteMutation) SetContext(s string) {
+	m.context = &s
+}
+
+// Context returns the value of the "context" field in the mutation.
+func (m *MovieQuoteMutation) Context() (r string, exists bool) {
+	v := m.context
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContext returns the old "context" field's value of the MovieQuote entity.
+// If the MovieQuote object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieQuoteMutation) OldContext(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContext is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContext requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContext: %w", err)
+	}
+	return oldValue.Context, nil
+}
+
+// ResetContext resets all changes to the "context" field.
+func (m *MovieQuoteMutation) ResetContext() {
+	m.context = nil
 }
 
 // SetMovieID sets the "movie" edge to the Movie entity by id.
@@ -1148,43 +2728,43 @@ func (m *MovieQuoteMutation) ResetMovie() {
 	m.clearedmovie = false
 }
 
-// SetCharacterID sets the "character" edge to the Character entity by id.
-func (m *MovieQuoteMutation) SetCharacterID(id int) {
-	m.character = &id
+// SetLanguageID sets the "language" edge to the Language entity by id.
+func (m *MovieQuoteMutation) SetLanguageID(id int) {
+	m.language = &id
 }
 
-// ClearCharacter clears the "character" edge to the Character entity.
-func (m *MovieQuoteMutation) ClearCharacter() {
-	m.clearedcharacter = true
+// ClearLanguage clears the "language" edge to the Language entity.
+func (m *MovieQuoteMutation) ClearLanguage() {
+	m.clearedlanguage = true
 }
 
-// CharacterCleared reports if the "character" edge to the Character entity was cleared.
-func (m *MovieQuoteMutation) CharacterCleared() bool {
-	return m.clearedcharacter
+// LanguageCleared reports if the "language" edge to the Language entity was cleared.
+func (m *MovieQuoteMutation) LanguageCleared() bool {
+	return m.clearedlanguage
 }
 
-// CharacterID returns the "character" edge ID in the mutation.
-func (m *MovieQuoteMutation) CharacterID() (id int, exists bool) {
-	if m.character != nil {
-		return *m.character, true
+// LanguageID returns the "language" edge ID in the mutation.
+func (m *MovieQuoteMutation) LanguageID() (id int, exists bool) {
+	if m.language != nil {
+		return *m.language, true
 	}
 	return
 }
 
-// CharacterIDs returns the "character" edge IDs in the mutation.
+// LanguageIDs returns the "language" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CharacterID instead. It exists only for internal usage by the builders.
-func (m *MovieQuoteMutation) CharacterIDs() (ids []int) {
-	if id := m.character; id != nil {
+// LanguageID instead. It exists only for internal usage by the builders.
+func (m *MovieQuoteMutation) LanguageIDs() (ids []int) {
+	if id := m.language; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetCharacter resets all changes to the "character" edge.
-func (m *MovieQuoteMutation) ResetCharacter() {
-	m.character = nil
-	m.clearedcharacter = false
+// ResetLanguage resets all changes to the "language" edge.
+func (m *MovieQuoteMutation) ResetLanguage() {
+	m.language = nil
+	m.clearedlanguage = false
 }
 
 // Where appends a list predicates to the MovieQuoteMutation builder.
@@ -1221,9 +2801,18 @@ func (m *MovieQuoteMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MovieQuoteMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, moviequote.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, moviequote.FieldUpdatedAt)
+	}
 	if m.quote != nil {
 		fields = append(fields, moviequote.FieldQuote)
+	}
+	if m.context != nil {
+		fields = append(fields, moviequote.FieldContext)
 	}
 	return fields
 }
@@ -1233,8 +2822,14 @@ func (m *MovieQuoteMutation) Fields() []string {
 // schema.
 func (m *MovieQuoteMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case moviequote.FieldCreatedAt:
+		return m.CreatedAt()
+	case moviequote.FieldUpdatedAt:
+		return m.UpdatedAt()
 	case moviequote.FieldQuote:
 		return m.Quote()
+	case moviequote.FieldContext:
+		return m.Context()
 	}
 	return nil, false
 }
@@ -1244,8 +2839,14 @@ func (m *MovieQuoteMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *MovieQuoteMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case moviequote.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case moviequote.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	case moviequote.FieldQuote:
 		return m.OldQuote(ctx)
+	case moviequote.FieldContext:
+		return m.OldContext(ctx)
 	}
 	return nil, fmt.Errorf("unknown MovieQuote field %s", name)
 }
@@ -1255,12 +2856,33 @@ func (m *MovieQuoteMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *MovieQuoteMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case moviequote.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case moviequote.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
 	case moviequote.FieldQuote:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetQuote(v)
+		return nil
+	case moviequote.FieldContext:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContext(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MovieQuote field %s", name)
@@ -1311,8 +2933,17 @@ func (m *MovieQuoteMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *MovieQuoteMutation) ResetField(name string) error {
 	switch name {
+	case moviequote.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case moviequote.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
 	case moviequote.FieldQuote:
 		m.ResetQuote()
+		return nil
+	case moviequote.FieldContext:
+		m.ResetContext()
 		return nil
 	}
 	return fmt.Errorf("unknown MovieQuote field %s", name)
@@ -1324,8 +2955,8 @@ func (m *MovieQuoteMutation) AddedEdges() []string {
 	if m.movie != nil {
 		edges = append(edges, moviequote.EdgeMovie)
 	}
-	if m.character != nil {
-		edges = append(edges, moviequote.EdgeCharacter)
+	if m.language != nil {
+		edges = append(edges, moviequote.EdgeLanguage)
 	}
 	return edges
 }
@@ -1338,8 +2969,8 @@ func (m *MovieQuoteMutation) AddedIDs(name string) []ent.Value {
 		if id := m.movie; id != nil {
 			return []ent.Value{*id}
 		}
-	case moviequote.EdgeCharacter:
-		if id := m.character; id != nil {
+	case moviequote.EdgeLanguage:
+		if id := m.language; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -1364,8 +2995,8 @@ func (m *MovieQuoteMutation) ClearedEdges() []string {
 	if m.clearedmovie {
 		edges = append(edges, moviequote.EdgeMovie)
 	}
-	if m.clearedcharacter {
-		edges = append(edges, moviequote.EdgeCharacter)
+	if m.clearedlanguage {
+		edges = append(edges, moviequote.EdgeLanguage)
 	}
 	return edges
 }
@@ -1376,8 +3007,8 @@ func (m *MovieQuoteMutation) EdgeCleared(name string) bool {
 	switch name {
 	case moviequote.EdgeMovie:
 		return m.clearedmovie
-	case moviequote.EdgeCharacter:
-		return m.clearedcharacter
+	case moviequote.EdgeLanguage:
+		return m.clearedlanguage
 	}
 	return false
 }
@@ -1389,8 +3020,8 @@ func (m *MovieQuoteMutation) ClearEdge(name string) error {
 	case moviequote.EdgeMovie:
 		m.ClearMovie()
 		return nil
-	case moviequote.EdgeCharacter:
-		m.ClearCharacter()
+	case moviequote.EdgeLanguage:
+		m.ClearLanguage()
 		return nil
 	}
 	return fmt.Errorf("unknown MovieQuote unique edge %s", name)
@@ -1403,8 +3034,8 @@ func (m *MovieQuoteMutation) ResetEdge(name string) error {
 	case moviequote.EdgeMovie:
 		m.ResetMovie()
 		return nil
-	case moviequote.EdgeCharacter:
-		m.ResetCharacter()
+	case moviequote.EdgeLanguage:
+		m.ResetLanguage()
 		return nil
 	}
 	return fmt.Errorf("unknown MovieQuote edge %s", name)

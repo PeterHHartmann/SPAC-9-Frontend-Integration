@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"api/ent"
+	"api/db/ent"
 	quotespb "api/proto/quotespb"
 
 	"entgo.io/ent/dialect/sql"

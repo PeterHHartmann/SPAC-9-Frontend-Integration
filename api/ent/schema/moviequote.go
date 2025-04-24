@@ -14,20 +14,28 @@ type MovieQuote struct {
 // Fields of the MovieQuote.
 func (MovieQuote) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("quote").NotEmpty(),
+		field.String("quote").
+			NotEmpty(),
+		field.String("context"),
 	}
 }
 
-// Edges of the MovieQuote.
+// Mixin for the audit fields (created_at, updated_at)
+func (MovieQuote) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		AuditMixin{},
+	}
+}
+
+// Edges of the MovieQuote i.e. relationships.
 func (MovieQuote) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("movie", Movie.Type).
 			Ref("quotes").
-			Unique().
-			Required(),
-		edge.From("character", Character.Type).
+			Unique(),
+		edge.From("language", Language.Type).
 			Ref("quotes").
-			Unique().
-			Required(),
+			Unique(),
+			
 	}
 }

@@ -4,10 +4,11 @@ package ent
 
 import (
 	"api/ent/character"
-	"api/ent/moviequote"
+	"api/ent/movie"
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,25 +21,63 @@ type CharacterCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (cc *CharacterCreate) SetCreatedAt(t time.Time) *CharacterCreate {
+	cc.mutation.SetCreatedAt(t)
+	return cc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (cc *CharacterCreate) SetNillableCreatedAt(t *time.Time) *CharacterCreate {
+	if t != nil {
+		cc.SetCreatedAt(*t)
+	}
+	return cc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cc *CharacterCreate) SetUpdatedAt(t time.Time) *CharacterCreate {
+	cc.mutation.SetUpdatedAt(t)
+	return cc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (cc *CharacterCreate) SetNillableUpdatedAt(t *time.Time) *CharacterCreate {
+	if t != nil {
+		cc.SetUpdatedAt(*t)
+	}
+	return cc
+}
+
 // SetName sets the "name" field.
 func (cc *CharacterCreate) SetName(s string) *CharacterCreate {
 	cc.mutation.SetName(s)
 	return cc
 }
 
-// AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by IDs.
-func (cc *CharacterCreate) AddQuoteIDs(ids ...int) *CharacterCreate {
-	cc.mutation.AddQuoteIDs(ids...)
+// SetActor sets the "actor" field.
+func (cc *CharacterCreate) SetActor(s string) *CharacterCreate {
+	cc.mutation.SetActor(s)
 	return cc
 }
 
-// AddQuotes adds the "quotes" edges to the MovieQuote entity.
-func (cc *CharacterCreate) AddQuotes(m ...*MovieQuote) *CharacterCreate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+// SetMovieID sets the "movie" edge to the Movie entity by ID.
+func (cc *CharacterCreate) SetMovieID(id int) *CharacterCreate {
+	cc.mutation.SetMovieID(id)
+	return cc
+}
+
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (cc *CharacterCreate) SetNillableMovieID(id *int) *CharacterCreate {
+	if id != nil {
+		cc = cc.SetMovieID(*id)
 	}
-	return cc.AddQuoteIDs(ids...)
+	return cc
+}
+
+// SetMovie sets the "movie" edge to the Movie entity.
+func (cc *CharacterCreate) SetMovie(m *Movie) *CharacterCreate {
+	return cc.SetMovieID(m.ID)
 }
 
 // Mutation returns the CharacterMutation object of the builder.
@@ -48,6 +87,7 @@ func (cc *CharacterCreate) Mutation() *CharacterMutation {
 
 // Save creates the Character in the database.
 func (cc *CharacterCreate) Save(ctx context.Context) (*Character, error) {
+	cc.defaults()
 	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
@@ -73,14 +113,40 @@ func (cc *CharacterCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (cc *CharacterCreate) defaults() {
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		v := character.DefaultCreatedAt()
+		cc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := cc.mutation.UpdatedAt(); !ok {
+		v := character.DefaultUpdatedAt()
+		cc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (cc *CharacterCreate) check() error {
+	if _, ok := cc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Character.created_at"`)}
+	}
+	if _, ok := cc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Character.updated_at"`)}
+	}
 	if _, ok := cc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Character.name"`)}
 	}
 	if v, ok := cc.mutation.Name(); ok {
 		if err := character.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Character.name": %w`, err)}
+		}
+	}
+	if _, ok := cc.mutation.Actor(); !ok {
+		return &ValidationError{Name: "actor", err: errors.New(`ent: missing required field "Character.actor"`)}
+	}
+	if v, ok := cc.mutation.Actor(); ok {
+		if err := character.ActorValidator(v); err != nil {
+			return &ValidationError{Name: "actor", err: fmt.Errorf(`ent: validator failed for field "Character.actor": %w`, err)}
 		}
 	}
 	return nil
@@ -109,24 +175,37 @@ func (cc *CharacterCreate) createSpec() (*Character, *sqlgraph.CreateSpec) {
 		_node = &Character{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(character.Table, sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt))
 	)
+	if value, ok := cc.mutation.CreatedAt(); ok {
+		_spec.SetField(character.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := cc.mutation.UpdatedAt(); ok {
+		_spec.SetField(character.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.SetField(character.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := cc.mutation.QuotesIDs(); len(nodes) > 0 {
+	if value, ok := cc.mutation.Actor(); ok {
+		_spec.SetField(character.FieldActor, field.TypeString, value)
+		_node.Actor = value
+	}
+	if nodes := cc.mutation.MovieIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   character.QuotesTable,
-			Columns: []string{character.QuotesColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   character.MovieTable,
+			Columns: []string{character.MovieColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(moviequote.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.movie_characters = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -150,6 +229,7 @@ func (ccb *CharacterCreateBulk) Save(ctx context.Context) ([]*Character, error) 
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CharacterMutation)
 				if !ok {

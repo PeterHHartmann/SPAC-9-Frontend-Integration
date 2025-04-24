@@ -1,0 +1,55 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+  COMPOSE_BAKE: true
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+  compose:build:
+    cmds:
+      - docker compose build {{.CLI_ARGS}}
+  compose:up:
+      cmds:
+      - docker compose up -d {{.CLI_ARGS}}
+  compose:start:
+    cmds:
+      - docker compose start {{.CLI_ARGS}}
+  compose:down:
+    cmds:
+      - docker compose down {{.CLI_ARGS}}
+  compose:destroy:
+    cmds:
+      - docker compose down -v {{.CLI_ARGS}}
+  compose:stop:
+    cmds:
+      - docker compose stop {{.CLI_ARGS}}
+  compose:restart:
+    cmds: 
+      - docker compose stop {{.CLI_ARGS}}
+      - docker compose up -d {{.CLI_ARGS}}
+  compose:config:
+    cmds:
+      - docker compose config {{.CLI_ARGS}}
+  compose:cache:clean:
+    cmds:
+      - docker buildx prune
+  compose:bake:
+    cmds:
+      - docker buildx bake
+  compose:bake:load:
+    cmds:
+      - docker buildx bake --load
+  compose:bake:push:
+    cmds:
+      - docker buildx bake --push
+
+includes:
+  api: 
+    taskfile: api/Taskfile.yml
+    dir: api

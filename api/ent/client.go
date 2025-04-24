@@ -11,7 +11,9 @@ import (
 
 	"api/ent/migrate"
 
+	"api/ent/category"
 	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 
@@ -26,8 +28,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Category is the client for interacting with the Category builders.
+	Category *CategoryClient
 	// Character is the client for interacting with the Character builders.
 	Character *CharacterClient
+	// Language is the client for interacting with the Language builders.
+	Language *LanguageClient
 	// Movie is the client for interacting with the Movie builders.
 	Movie *MovieClient
 	// MovieQuote is the client for interacting with the MovieQuote builders.
@@ -43,7 +49,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Category = NewCategoryClient(c.config)
 	c.Character = NewCharacterClient(c.config)
+	c.Language = NewLanguageClient(c.config)
 	c.Movie = NewMovieClient(c.config)
 	c.MovieQuote = NewMovieQuoteClient(c.config)
 }
@@ -138,7 +146,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:        ctx,
 		config:     cfg,
+		Category:   NewCategoryClient(cfg),
 		Character:  NewCharacterClient(cfg),
+		Language:   NewLanguageClient(cfg),
 		Movie:      NewMovieClient(cfg),
 		MovieQuote: NewMovieQuoteClient(cfg),
 	}, nil
@@ -160,7 +170,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:        ctx,
 		config:     cfg,
+		Category:   NewCategoryClient(cfg),
 		Character:  NewCharacterClient(cfg),
+		Language:   NewLanguageClient(cfg),
 		Movie:      NewMovieClient(cfg),
 		MovieQuote: NewMovieQuoteClient(cfg),
 	}, nil
@@ -169,7 +181,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Character.
+//		Category.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -191,7 +203,9 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Category.Use(hooks...)
 	c.Character.Use(hooks...)
+	c.Language.Use(hooks...)
 	c.Movie.Use(hooks...)
 	c.MovieQuote.Use(hooks...)
 }
@@ -199,7 +213,9 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Category.Intercept(interceptors...)
 	c.Character.Intercept(interceptors...)
+	c.Language.Intercept(interceptors...)
 	c.Movie.Intercept(interceptors...)
 	c.MovieQuote.Intercept(interceptors...)
 }
@@ -207,14 +223,167 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CategoryMutation:
+		return c.Category.mutate(ctx, m)
 	case *CharacterMutation:
 		return c.Character.mutate(ctx, m)
+	case *LanguageMutation:
+		return c.Language.mutate(ctx, m)
 	case *MovieMutation:
 		return c.Movie.mutate(ctx, m)
 	case *MovieQuoteMutation:
 		return c.MovieQuote.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CategoryClient is a client for the Category schema.
+type CategoryClient struct {
+	config
+}
+
+// NewCategoryClient returns a client for the Category from the given config.
+func NewCategoryClient(c config) *CategoryClient {
+	return &CategoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `category.Hooks(f(g(h())))`.
+func (c *CategoryClient) Use(hooks ...Hook) {
+	c.hooks.Category = append(c.hooks.Category, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `category.Intercept(f(g(h())))`.
+func (c *CategoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Category = append(c.inters.Category, interceptors...)
+}
+
+// Create returns a builder for creating a Category entity.
+func (c *CategoryClient) Create() *CategoryCreate {
+	mutation := newCategoryMutation(c.config, OpCreate)
+	return &CategoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Category entities.
+func (c *CategoryClient) CreateBulk(builders ...*CategoryCreate) *CategoryCreateBulk {
+	return &CategoryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CategoryClient) MapCreateBulk(slice any, setFunc func(*CategoryCreate, int)) *CategoryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CategoryCreateBulk{err: fmt.Errorf("calling to CategoryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CategoryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CategoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Category.
+func (c *CategoryClient) Update() *CategoryUpdate {
+	mutation := newCategoryMutation(c.config, OpUpdate)
+	return &CategoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CategoryClient) UpdateOne(ca *Category) *CategoryUpdateOne {
+	mutation := newCategoryMutation(c.config, OpUpdateOne, withCategory(ca))
+	return &CategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CategoryClient) UpdateOneID(id int) *CategoryUpdateOne {
+	mutation := newCategoryMutation(c.config, OpUpdateOne, withCategoryID(id))
+	return &CategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Category.
+func (c *CategoryClient) Delete() *CategoryDelete {
+	mutation := newCategoryMutation(c.config, OpDelete)
+	return &CategoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CategoryClient) DeleteOne(ca *Category) *CategoryDeleteOne {
+	return c.DeleteOneID(ca.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CategoryClient) DeleteOneID(id int) *CategoryDeleteOne {
+	builder := c.Delete().Where(category.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CategoryDeleteOne{builder}
+}
+
+// Query returns a query builder for Category.
+func (c *CategoryClient) Query() *CategoryQuery {
+	return &CategoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCategory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Category entity by its id.
+func (c *CategoryClient) Get(ctx context.Context, id int) (*Category, error) {
+	return c.Query().Where(category.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CategoryClient) GetX(ctx context.Context, id int) *Category {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMovies queries the movies edge of a Category.
+func (c *CategoryClient) QueryMovies(ca *Category) *MovieQuery {
+	query := (&MovieClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ca.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(category.Table, category.FieldID, id),
+			sqlgraph.To(movie.Table, movie.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, category.MoviesTable, category.MoviesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CategoryClient) Hooks() []Hook {
+	return c.hooks.Category
+}
+
+// Interceptors returns the client interceptors.
+func (c *CategoryClient) Interceptors() []Interceptor {
+	return c.inters.Category
+}
+
+func (c *CategoryClient) mutate(ctx context.Context, m *CategoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CategoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CategoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CategoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Category mutation op: %q", m.Op())
 	}
 }
 
@@ -326,15 +495,15 @@ func (c *CharacterClient) GetX(ctx context.Context, id int) *Character {
 	return obj
 }
 
-// QueryQuotes queries the quotes edge of a Character.
-func (c *CharacterClient) QueryQuotes(ch *Character) *MovieQuoteQuery {
-	query := (&MovieQuoteClient{config: c.config}).Query()
+// QueryMovie queries the movie edge of a Character.
+func (c *CharacterClient) QueryMovie(ch *Character) *MovieQuery {
+	query := (&MovieClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(character.Table, character.FieldID, id),
-			sqlgraph.To(moviequote.Table, moviequote.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, character.QuotesTable, character.QuotesColumn),
+			sqlgraph.To(movie.Table, movie.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, character.MovieTable, character.MovieColumn),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -364,6 +533,155 @@ func (c *CharacterClient) mutate(ctx context.Context, m *CharacterMutation) (Val
 		return (&CharacterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Character mutation op: %q", m.Op())
+	}
+}
+
+// LanguageClient is a client for the Language schema.
+type LanguageClient struct {
+	config
+}
+
+// NewLanguageClient returns a client for the Language from the given config.
+func NewLanguageClient(c config) *LanguageClient {
+	return &LanguageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `language.Hooks(f(g(h())))`.
+func (c *LanguageClient) Use(hooks ...Hook) {
+	c.hooks.Language = append(c.hooks.Language, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `language.Intercept(f(g(h())))`.
+func (c *LanguageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Language = append(c.inters.Language, interceptors...)
+}
+
+// Create returns a builder for creating a Language entity.
+func (c *LanguageClient) Create() *LanguageCreate {
+	mutation := newLanguageMutation(c.config, OpCreate)
+	return &LanguageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Language entities.
+func (c *LanguageClient) CreateBulk(builders ...*LanguageCreate) *LanguageCreateBulk {
+	return &LanguageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LanguageClient) MapCreateBulk(slice any, setFunc func(*LanguageCreate, int)) *LanguageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LanguageCreateBulk{err: fmt.Errorf("calling to LanguageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LanguageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LanguageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Language.
+func (c *LanguageClient) Update() *LanguageUpdate {
+	mutation := newLanguageMutation(c.config, OpUpdate)
+	return &LanguageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LanguageClient) UpdateOne(l *Language) *LanguageUpdateOne {
+	mutation := newLanguageMutation(c.config, OpUpdateOne, withLanguage(l))
+	return &LanguageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LanguageClient) UpdateOneID(id int) *LanguageUpdateOne {
+	mutation := newLanguageMutation(c.config, OpUpdateOne, withLanguageID(id))
+	return &LanguageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Language.
+func (c *LanguageClient) Delete() *LanguageDelete {
+	mutation := newLanguageMutation(c.config, OpDelete)
+	return &LanguageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LanguageClient) DeleteOne(l *Language) *LanguageDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LanguageClient) DeleteOneID(id int) *LanguageDeleteOne {
+	builder := c.Delete().Where(language.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LanguageDeleteOne{builder}
+}
+
+// Query returns a query builder for Language.
+func (c *LanguageClient) Query() *LanguageQuery {
+	return &LanguageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLanguage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Language entity by its id.
+func (c *LanguageClient) Get(ctx context.Context, id int) (*Language, error) {
+	return c.Query().Where(language.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LanguageClient) GetX(ctx context.Context, id int) *Language {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryQuotes queries the quotes edge of a Language.
+func (c *LanguageClient) QueryQuotes(l *Language) *MovieQuoteQuery {
+	query := (&MovieQuoteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(language.Table, language.FieldID, id),
+			sqlgraph.To(moviequote.Table, moviequote.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, language.QuotesTable, language.QuotesColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LanguageClient) Hooks() []Hook {
+	return c.hooks.Language
+}
+
+// Interceptors returns the client interceptors.
+func (c *LanguageClient) Interceptors() []Interceptor {
+	return c.inters.Language
+}
+
+func (c *LanguageClient) mutate(ctx context.Context, m *LanguageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LanguageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LanguageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LanguageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LanguageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Language mutation op: %q", m.Op())
 	}
 }
 
@@ -473,6 +791,38 @@ func (c *MovieClient) GetX(ctx context.Context, id int) *Movie {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryCategory queries the category edge of a Movie.
+func (c *MovieClient) QueryCategory(m *Movie) *CategoryQuery {
+	query := (&CategoryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(movie.Table, movie.FieldID, id),
+			sqlgraph.To(category.Table, category.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, movie.CategoryTable, movie.CategoryPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCharacters queries the characters edge of a Movie.
+func (c *MovieClient) QueryCharacters(m *Movie) *CharacterQuery {
+	query := (&CharacterClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(movie.Table, movie.FieldID, id),
+			sqlgraph.To(character.Table, character.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, movie.CharactersTable, movie.CharactersColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // QueryQuotes queries the quotes edge of a Movie.
@@ -640,15 +990,15 @@ func (c *MovieQuoteClient) QueryMovie(mq *MovieQuote) *MovieQuery {
 	return query
 }
 
-// QueryCharacter queries the character edge of a MovieQuote.
-func (c *MovieQuoteClient) QueryCharacter(mq *MovieQuote) *CharacterQuery {
-	query := (&CharacterClient{config: c.config}).Query()
+// QueryLanguage queries the language edge of a MovieQuote.
+func (c *MovieQuoteClient) QueryLanguage(mq *MovieQuote) *LanguageQuery {
+	query := (&LanguageClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := mq.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(moviequote.Table, moviequote.FieldID, id),
-			sqlgraph.To(character.Table, character.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, moviequote.CharacterTable, moviequote.CharacterColumn),
+			sqlgraph.To(language.Table, language.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moviequote.LanguageTable, moviequote.LanguageColumn),
 		)
 		fromV = sqlgraph.Neighbors(mq.driver.Dialect(), step)
 		return fromV, nil
@@ -684,9 +1034,9 @@ func (c *MovieQuoteClient) mutate(ctx context.Context, m *MovieQuoteMutation) (V
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Character, Movie, MovieQuote []ent.Hook
+		Category, Character, Language, Movie, MovieQuote []ent.Hook
 	}
 	inters struct {
-		Character, Movie, MovieQuote []ent.Interceptor
+		Category, Character, Language, Movie, MovieQuote []ent.Interceptor
 	}
 )

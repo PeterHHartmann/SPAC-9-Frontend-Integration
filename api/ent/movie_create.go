@@ -3,11 +3,14 @@
 package ent
 
 import (
+	"api/ent/category"
+	"api/ent/character"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,6 +23,34 @@ type MovieCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (mc *MovieCreate) SetCreatedAt(t time.Time) *MovieCreate {
+	mc.mutation.SetCreatedAt(t)
+	return mc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (mc *MovieCreate) SetNillableCreatedAt(t *time.Time) *MovieCreate {
+	if t != nil {
+		mc.SetCreatedAt(*t)
+	}
+	return mc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (mc *MovieCreate) SetUpdatedAt(t time.Time) *MovieCreate {
+	mc.mutation.SetUpdatedAt(t)
+	return mc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (mc *MovieCreate) SetNillableUpdatedAt(t *time.Time) *MovieCreate {
+	if t != nil {
+		mc.SetUpdatedAt(*t)
+	}
+	return mc
+}
+
 // SetTitle sets the "title" field.
 func (mc *MovieCreate) SetTitle(s string) *MovieCreate {
 	mc.mutation.SetTitle(s)
@@ -30,6 +61,36 @@ func (mc *MovieCreate) SetTitle(s string) *MovieCreate {
 func (mc *MovieCreate) SetYear(i int) *MovieCreate {
 	mc.mutation.SetYear(i)
 	return mc
+}
+
+// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
+func (mc *MovieCreate) AddCategoryIDs(ids ...int) *MovieCreate {
+	mc.mutation.AddCategoryIDs(ids...)
+	return mc
+}
+
+// AddCategory adds the "category" edges to the Category entity.
+func (mc *MovieCreate) AddCategory(c ...*Category) *MovieCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return mc.AddCategoryIDs(ids...)
+}
+
+// AddCharacterIDs adds the "characters" edge to the Character entity by IDs.
+func (mc *MovieCreate) AddCharacterIDs(ids ...int) *MovieCreate {
+	mc.mutation.AddCharacterIDs(ids...)
+	return mc
+}
+
+// AddCharacters adds the "characters" edges to the Character entity.
+func (mc *MovieCreate) AddCharacters(c ...*Character) *MovieCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return mc.AddCharacterIDs(ids...)
 }
 
 // AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by IDs.
@@ -54,6 +115,7 @@ func (mc *MovieCreate) Mutation() *MovieMutation {
 
 // Save creates the Movie in the database.
 func (mc *MovieCreate) Save(ctx context.Context) (*Movie, error) {
+	mc.defaults()
 	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
 }
 
@@ -79,8 +141,26 @@ func (mc *MovieCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (mc *MovieCreate) defaults() {
+	if _, ok := mc.mutation.CreatedAt(); !ok {
+		v := movie.DefaultCreatedAt()
+		mc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := mc.mutation.UpdatedAt(); !ok {
+		v := movie.DefaultUpdatedAt()
+		mc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mc *MovieCreate) check() error {
+	if _, ok := mc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Movie.created_at"`)}
+	}
+	if _, ok := mc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Movie.updated_at"`)}
+	}
 	if _, ok := mc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Movie.title"`)}
 	}
@@ -91,6 +171,14 @@ func (mc *MovieCreate) check() error {
 	}
 	if _, ok := mc.mutation.Year(); !ok {
 		return &ValidationError{Name: "year", err: errors.New(`ent: missing required field "Movie.year"`)}
+	}
+	if v, ok := mc.mutation.Year(); ok {
+		if err := movie.YearValidator(v); err != nil {
+			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
+		}
+	}
+	if len(mc.mutation.CategoryIDs()) == 0 {
+		return &ValidationError{Name: "category", err: errors.New(`ent: missing required edge "Movie.category"`)}
 	}
 	return nil
 }
@@ -118,6 +206,14 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 		_node = &Movie{config: mc.config}
 		_spec = sqlgraph.NewCreateSpec(movie.Table, sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt))
 	)
+	if value, ok := mc.mutation.CreatedAt(); ok {
+		_spec.SetField(movie.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := mc.mutation.UpdatedAt(); ok {
+		_spec.SetField(movie.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := mc.mutation.Title(); ok {
 		_spec.SetField(movie.FieldTitle, field.TypeString, value)
 		_node.Title = value
@@ -125,6 +221,38 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 	if value, ok := mc.mutation.Year(); ok {
 		_spec.SetField(movie.FieldYear, field.TypeInt, value)
 		_node.Year = value
+	}
+	if nodes := mc.mutation.CategoryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   movie.CategoryTable,
+			Columns: movie.CategoryPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.CharactersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   movie.CharactersTable,
+			Columns: []string{movie.CharactersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mc.mutation.QuotesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -163,6 +291,7 @@ func (mcb *MovieCreateBulk) Save(ctx context.Context) ([]*Movie, error) {
 	for i := range mcb.builders {
 		func(i int, root context.Context) {
 			builder := mcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MovieMutation)
 				if !ok {

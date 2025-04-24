@@ -3,6 +3,8 @@
 package character
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -12,25 +14,40 @@ const (
 	Label = "character"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeQuotes holds the string denoting the quotes edge name in mutations.
-	EdgeQuotes = "quotes"
+	// FieldActor holds the string denoting the actor field in the database.
+	FieldActor = "actor"
+	// EdgeMovie holds the string denoting the movie edge name in mutations.
+	EdgeMovie = "movie"
 	// Table holds the table name of the character in the database.
 	Table = "characters"
-	// QuotesTable is the table that holds the quotes relation/edge.
-	QuotesTable = "movie_quotes"
-	// QuotesInverseTable is the table name for the MovieQuote entity.
-	// It exists in this package in order to avoid circular dependency with the "moviequote" package.
-	QuotesInverseTable = "movie_quotes"
-	// QuotesColumn is the table column denoting the quotes relation/edge.
-	QuotesColumn = "character_quotes"
+	// MovieTable is the table that holds the movie relation/edge.
+	MovieTable = "characters"
+	// MovieInverseTable is the table name for the Movie entity.
+	// It exists in this package in order to avoid circular dependency with the "movie" package.
+	MovieInverseTable = "movies"
+	// MovieColumn is the table column denoting the movie relation/edge.
+	MovieColumn = "movie_characters"
 )
 
 // Columns holds all SQL columns for character fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldName,
+	FieldActor,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "characters"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"movie_characters",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -40,12 +57,25 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// ActorValidator is a validator for the "actor" field. It is called by the builders before save.
+	ActorValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Character queries.
@@ -56,28 +86,36 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByQuotesCount orders the results by quotes count.
-func ByQuotesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newQuotesStep(), opts...)
-	}
+// ByActor orders the results by the actor field.
+func ByActor(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActor, opts...).ToFunc()
 }
 
-// ByQuotes orders the results by quotes terms.
-func ByQuotes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByMovieField orders the results by movie field.
+func ByMovieField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newQuotesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newMovieStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newQuotesStep() *sqlgraph.Step {
+func newMovieStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(QuotesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, QuotesTable, QuotesColumn),
+		sqlgraph.To(MovieInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, MovieTable, MovieColumn),
 	)
 }

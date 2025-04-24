@@ -3,11 +3,12 @@
 package ent
 
 import (
-	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -18,22 +19,28 @@ type MovieQuote struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Quote holds the value of the "quote" field.
 	Quote string `json:"quote,omitempty"`
+	// Context holds the value of the "context" field.
+	Context string `json:"context,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MovieQuoteQuery when eager-loading is set.
-	Edges            MovieQuoteEdges `json:"edges"`
-	character_quotes *int
-	movie_quotes     *int
-	selectValues     sql.SelectValues
+	Edges           MovieQuoteEdges `json:"edges"`
+	language_quotes *int
+	movie_quotes    *int
+	selectValues    sql.SelectValues
 }
 
 // MovieQuoteEdges holds the relations/edges for other nodes in the graph.
 type MovieQuoteEdges struct {
 	// Movie holds the value of the movie edge.
 	Movie *Movie `json:"movie,omitempty"`
-	// Character holds the value of the character edge.
-	Character *Character `json:"character,omitempty"`
+	// Language holds the value of the language edge.
+	Language *Language `json:"language,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -50,15 +57,15 @@ func (e MovieQuoteEdges) MovieOrErr() (*Movie, error) {
 	return nil, &NotLoadedError{edge: "movie"}
 }
 
-// CharacterOrErr returns the Character value or an error if the edge
+// LanguageOrErr returns the Language value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MovieQuoteEdges) CharacterOrErr() (*Character, error) {
-	if e.Character != nil {
-		return e.Character, nil
+func (e MovieQuoteEdges) LanguageOrErr() (*Language, error) {
+	if e.Language != nil {
+		return e.Language, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: character.Label}
+		return nil, &NotFoundError{label: language.Label}
 	}
-	return nil, &NotLoadedError{edge: "character"}
+	return nil, &NotLoadedError{edge: "language"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -68,9 +75,11 @@ func (*MovieQuote) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case moviequote.FieldID:
 			values[i] = new(sql.NullInt64)
-		case moviequote.FieldQuote:
+		case moviequote.FieldQuote, moviequote.FieldContext:
 			values[i] = new(sql.NullString)
-		case moviequote.ForeignKeys[0]: // character_quotes
+		case moviequote.FieldCreatedAt, moviequote.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case moviequote.ForeignKeys[0]: // language_quotes
 			values[i] = new(sql.NullInt64)
 		case moviequote.ForeignKeys[1]: // movie_quotes
 			values[i] = new(sql.NullInt64)
@@ -95,18 +104,36 @@ func (mq *MovieQuote) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			mq.ID = int(value.Int64)
+		case moviequote.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				mq.CreatedAt = value.Time
+			}
+		case moviequote.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				mq.UpdatedAt = value.Time
+			}
 		case moviequote.FieldQuote:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field quote", values[i])
 			} else if value.Valid {
 				mq.Quote = value.String
 			}
+		case moviequote.FieldContext:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field context", values[i])
+			} else if value.Valid {
+				mq.Context = value.String
+			}
 		case moviequote.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field character_quotes", value)
+				return fmt.Errorf("unexpected type %T for edge-field language_quotes", value)
 			} else if value.Valid {
-				mq.character_quotes = new(int)
-				*mq.character_quotes = int(value.Int64)
+				mq.language_quotes = new(int)
+				*mq.language_quotes = int(value.Int64)
 			}
 		case moviequote.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -133,9 +160,9 @@ func (mq *MovieQuote) QueryMovie() *MovieQuery {
 	return NewMovieQuoteClient(mq.config).QueryMovie(mq)
 }
 
-// QueryCharacter queries the "character" edge of the MovieQuote entity.
-func (mq *MovieQuote) QueryCharacter() *CharacterQuery {
-	return NewMovieQuoteClient(mq.config).QueryCharacter(mq)
+// QueryLanguage queries the "language" edge of the MovieQuote entity.
+func (mq *MovieQuote) QueryLanguage() *LanguageQuery {
+	return NewMovieQuoteClient(mq.config).QueryLanguage(mq)
 }
 
 // Update returns a builder for updating this MovieQuote.
@@ -161,8 +188,17 @@ func (mq *MovieQuote) String() string {
 	var builder strings.Builder
 	builder.WriteString("MovieQuote(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", mq.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(mq.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(mq.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("quote=")
 	builder.WriteString(mq.Quote)
+	builder.WriteString(", ")
+	builder.WriteString("context=")
+	builder.WriteString(mq.Context)
 	builder.WriteByte(')')
 	return builder.String()
 }

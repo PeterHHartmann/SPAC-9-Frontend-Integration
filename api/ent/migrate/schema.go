@@ -8,20 +8,67 @@ import (
 )
 
 var (
+	// CategoriesColumns holds the columns for the "categories" table.
+	CategoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Unique: true},
+	}
+	// CategoriesTable holds the schema information for the "categories" table.
+	CategoriesTable = &schema.Table{
+		Name:       "categories",
+		Columns:    CategoriesColumns,
+		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
+	}
 	// CharactersColumns holds the columns for the "characters" table.
 	CharactersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "actor", Type: field.TypeString},
+		{Name: "movie_characters", Type: field.TypeInt, Nullable: true},
 	}
 	// CharactersTable holds the schema information for the "characters" table.
 	CharactersTable = &schema.Table{
 		Name:       "characters",
 		Columns:    CharactersColumns,
 		PrimaryKey: []*schema.Column{CharactersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "characters_movies_characters",
+				Columns:    []*schema.Column{CharactersColumns[5]},
+				RefColumns: []*schema.Column{MoviesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "character_name_actor",
+				Unique:  true,
+				Columns: []*schema.Column{CharactersColumns[3], CharactersColumns[4]},
+			},
+		},
+	}
+	// LanguagesColumns holds the columns for the "languages" table.
+	LanguagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Unique: true},
+	}
+	// LanguagesTable holds the schema information for the "languages" table.
+	LanguagesTable = &schema.Table{
+		Name:       "languages",
+		Columns:    LanguagesColumns,
+		PrimaryKey: []*schema.Column{LanguagesColumns[0]},
 	}
 	// MoviesColumns holds the columns for the "movies" table.
 	MoviesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Unique: true},
 		{Name: "year", Type: field.TypeInt},
 	}
@@ -34,9 +81,12 @@ var (
 	// MovieQuotesColumns holds the columns for the "movie_quotes" table.
 	MovieQuotesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "quote", Type: field.TypeString},
-		{Name: "character_quotes", Type: field.TypeInt},
-		{Name: "movie_quotes", Type: field.TypeInt},
+		{Name: "context", Type: field.TypeString},
+		{Name: "language_quotes", Type: field.TypeInt, Nullable: true},
+		{Name: "movie_quotes", Type: field.TypeInt, Nullable: true},
 	}
 	// MovieQuotesTable holds the schema information for the "movie_quotes" table.
 	MovieQuotesTable = &schema.Table{
@@ -45,28 +95,59 @@ var (
 		PrimaryKey: []*schema.Column{MovieQuotesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "movie_quotes_characters_quotes",
-				Columns:    []*schema.Column{MovieQuotesColumns[2]},
-				RefColumns: []*schema.Column{CharactersColumns[0]},
-				OnDelete:   schema.NoAction,
+				Symbol:     "movie_quotes_languages_quotes",
+				Columns:    []*schema.Column{MovieQuotesColumns[5]},
+				RefColumns: []*schema.Column{LanguagesColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "movie_quotes_movies_quotes",
-				Columns:    []*schema.Column{MovieQuotesColumns[3]},
+				Columns:    []*schema.Column{MovieQuotesColumns[6]},
 				RefColumns: []*schema.Column{MoviesColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// CategoryMoviesColumns holds the columns for the "category_movies" table.
+	CategoryMoviesColumns = []*schema.Column{
+		{Name: "category_id", Type: field.TypeInt},
+		{Name: "movie_id", Type: field.TypeInt},
+	}
+	// CategoryMoviesTable holds the schema information for the "category_movies" table.
+	CategoryMoviesTable = &schema.Table{
+		Name:       "category_movies",
+		Columns:    CategoryMoviesColumns,
+		PrimaryKey: []*schema.Column{CategoryMoviesColumns[0], CategoryMoviesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "category_movies_category_id",
+				Columns:    []*schema.Column{CategoryMoviesColumns[0]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "category_movies_movie_id",
+				Columns:    []*schema.Column{CategoryMoviesColumns[1]},
+				RefColumns: []*schema.Column{MoviesColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CategoriesTable,
 		CharactersTable,
+		LanguagesTable,
 		MoviesTable,
 		MovieQuotesTable,
+		CategoryMoviesTable,
 	}
 )
 
 func init() {
-	MovieQuotesTable.ForeignKeys[0].RefTable = CharactersTable
+	CharactersTable.ForeignKeys[0].RefTable = MoviesTable
+	MovieQuotesTable.ForeignKeys[0].RefTable = LanguagesTable
 	MovieQuotesTable.ForeignKeys[1].RefTable = MoviesTable
+	CategoryMoviesTable.ForeignKeys[0].RefTable = CategoriesTable
+	CategoryMoviesTable.ForeignKeys[1].RefTable = MoviesTable
 }

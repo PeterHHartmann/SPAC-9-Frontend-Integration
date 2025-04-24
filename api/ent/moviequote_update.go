@@ -3,13 +3,14 @@
 package ent
 
 import (
-	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"api/ent/predicate"
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,6 +30,12 @@ func (mqu *MovieQuoteUpdate) Where(ps ...predicate.MovieQuote) *MovieQuoteUpdate
 	return mqu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (mqu *MovieQuoteUpdate) SetUpdatedAt(t time.Time) *MovieQuoteUpdate {
+	mqu.mutation.SetUpdatedAt(t)
+	return mqu
+}
+
 // SetQuote sets the "quote" field.
 func (mqu *MovieQuoteUpdate) SetQuote(s string) *MovieQuoteUpdate {
 	mqu.mutation.SetQuote(s)
@@ -43,9 +50,31 @@ func (mqu *MovieQuoteUpdate) SetNillableQuote(s *string) *MovieQuoteUpdate {
 	return mqu
 }
 
+// SetContext sets the "context" field.
+func (mqu *MovieQuoteUpdate) SetContext(s string) *MovieQuoteUpdate {
+	mqu.mutation.SetContext(s)
+	return mqu
+}
+
+// SetNillableContext sets the "context" field if the given value is not nil.
+func (mqu *MovieQuoteUpdate) SetNillableContext(s *string) *MovieQuoteUpdate {
+	if s != nil {
+		mqu.SetContext(*s)
+	}
+	return mqu
+}
+
 // SetMovieID sets the "movie" edge to the Movie entity by ID.
 func (mqu *MovieQuoteUpdate) SetMovieID(id int) *MovieQuoteUpdate {
 	mqu.mutation.SetMovieID(id)
+	return mqu
+}
+
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (mqu *MovieQuoteUpdate) SetNillableMovieID(id *int) *MovieQuoteUpdate {
+	if id != nil {
+		mqu = mqu.SetMovieID(*id)
+	}
 	return mqu
 }
 
@@ -54,15 +83,23 @@ func (mqu *MovieQuoteUpdate) SetMovie(m *Movie) *MovieQuoteUpdate {
 	return mqu.SetMovieID(m.ID)
 }
 
-// SetCharacterID sets the "character" edge to the Character entity by ID.
-func (mqu *MovieQuoteUpdate) SetCharacterID(id int) *MovieQuoteUpdate {
-	mqu.mutation.SetCharacterID(id)
+// SetLanguageID sets the "language" edge to the Language entity by ID.
+func (mqu *MovieQuoteUpdate) SetLanguageID(id int) *MovieQuoteUpdate {
+	mqu.mutation.SetLanguageID(id)
 	return mqu
 }
 
-// SetCharacter sets the "character" edge to the Character entity.
-func (mqu *MovieQuoteUpdate) SetCharacter(c *Character) *MovieQuoteUpdate {
-	return mqu.SetCharacterID(c.ID)
+// SetNillableLanguageID sets the "language" edge to the Language entity by ID if the given value is not nil.
+func (mqu *MovieQuoteUpdate) SetNillableLanguageID(id *int) *MovieQuoteUpdate {
+	if id != nil {
+		mqu = mqu.SetLanguageID(*id)
+	}
+	return mqu
+}
+
+// SetLanguage sets the "language" edge to the Language entity.
+func (mqu *MovieQuoteUpdate) SetLanguage(l *Language) *MovieQuoteUpdate {
+	return mqu.SetLanguageID(l.ID)
 }
 
 // Mutation returns the MovieQuoteMutation object of the builder.
@@ -76,14 +113,15 @@ func (mqu *MovieQuoteUpdate) ClearMovie() *MovieQuoteUpdate {
 	return mqu
 }
 
-// ClearCharacter clears the "character" edge to the Character entity.
-func (mqu *MovieQuoteUpdate) ClearCharacter() *MovieQuoteUpdate {
-	mqu.mutation.ClearCharacter()
+// ClearLanguage clears the "language" edge to the Language entity.
+func (mqu *MovieQuoteUpdate) ClearLanguage() *MovieQuoteUpdate {
+	mqu.mutation.ClearLanguage()
 	return mqu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (mqu *MovieQuoteUpdate) Save(ctx context.Context) (int, error) {
+	mqu.defaults()
 	return withHooks(ctx, mqu.sqlSave, mqu.mutation, mqu.hooks)
 }
 
@@ -109,18 +147,20 @@ func (mqu *MovieQuoteUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (mqu *MovieQuoteUpdate) defaults() {
+	if _, ok := mqu.mutation.UpdatedAt(); !ok {
+		v := moviequote.UpdateDefaultUpdatedAt()
+		mqu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mqu *MovieQuoteUpdate) check() error {
 	if v, ok := mqu.mutation.Quote(); ok {
 		if err := moviequote.QuoteValidator(v); err != nil {
 			return &ValidationError{Name: "quote", err: fmt.Errorf(`ent: validator failed for field "MovieQuote.quote": %w`, err)}
 		}
-	}
-	if mqu.mutation.MovieCleared() && len(mqu.mutation.MovieIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "MovieQuote.movie"`)
-	}
-	if mqu.mutation.CharacterCleared() && len(mqu.mutation.CharacterIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "MovieQuote.character"`)
 	}
 	return nil
 }
@@ -137,8 +177,14 @@ func (mqu *MovieQuoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := mqu.mutation.UpdatedAt(); ok {
+		_spec.SetField(moviequote.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := mqu.mutation.Quote(); ok {
 		_spec.SetField(moviequote.FieldQuote, field.TypeString, value)
+	}
+	if value, ok := mqu.mutation.Context(); ok {
+		_spec.SetField(moviequote.FieldContext, field.TypeString, value)
 	}
 	if mqu.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -169,28 +215,28 @@ func (mqu *MovieQuoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if mqu.mutation.CharacterCleared() {
+	if mqu.mutation.LanguageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   moviequote.CharacterTable,
-			Columns: []string{moviequote.CharacterColumn},
+			Table:   moviequote.LanguageTable,
+			Columns: []string{moviequote.LanguageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(language.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mqu.mutation.CharacterIDs(); len(nodes) > 0 {
+	if nodes := mqu.mutation.LanguageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   moviequote.CharacterTable,
-			Columns: []string{moviequote.CharacterColumn},
+			Table:   moviequote.LanguageTable,
+			Columns: []string{moviequote.LanguageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(language.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -218,6 +264,12 @@ type MovieQuoteUpdateOne struct {
 	mutation *MovieQuoteMutation
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (mquo *MovieQuoteUpdateOne) SetUpdatedAt(t time.Time) *MovieQuoteUpdateOne {
+	mquo.mutation.SetUpdatedAt(t)
+	return mquo
+}
+
 // SetQuote sets the "quote" field.
 func (mquo *MovieQuoteUpdateOne) SetQuote(s string) *MovieQuoteUpdateOne {
 	mquo.mutation.SetQuote(s)
@@ -232,9 +284,31 @@ func (mquo *MovieQuoteUpdateOne) SetNillableQuote(s *string) *MovieQuoteUpdateOn
 	return mquo
 }
 
+// SetContext sets the "context" field.
+func (mquo *MovieQuoteUpdateOne) SetContext(s string) *MovieQuoteUpdateOne {
+	mquo.mutation.SetContext(s)
+	return mquo
+}
+
+// SetNillableContext sets the "context" field if the given value is not nil.
+func (mquo *MovieQuoteUpdateOne) SetNillableContext(s *string) *MovieQuoteUpdateOne {
+	if s != nil {
+		mquo.SetContext(*s)
+	}
+	return mquo
+}
+
 // SetMovieID sets the "movie" edge to the Movie entity by ID.
 func (mquo *MovieQuoteUpdateOne) SetMovieID(id int) *MovieQuoteUpdateOne {
 	mquo.mutation.SetMovieID(id)
+	return mquo
+}
+
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (mquo *MovieQuoteUpdateOne) SetNillableMovieID(id *int) *MovieQuoteUpdateOne {
+	if id != nil {
+		mquo = mquo.SetMovieID(*id)
+	}
 	return mquo
 }
 
@@ -243,15 +317,23 @@ func (mquo *MovieQuoteUpdateOne) SetMovie(m *Movie) *MovieQuoteUpdateOne {
 	return mquo.SetMovieID(m.ID)
 }
 
-// SetCharacterID sets the "character" edge to the Character entity by ID.
-func (mquo *MovieQuoteUpdateOne) SetCharacterID(id int) *MovieQuoteUpdateOne {
-	mquo.mutation.SetCharacterID(id)
+// SetLanguageID sets the "language" edge to the Language entity by ID.
+func (mquo *MovieQuoteUpdateOne) SetLanguageID(id int) *MovieQuoteUpdateOne {
+	mquo.mutation.SetLanguageID(id)
 	return mquo
 }
 
-// SetCharacter sets the "character" edge to the Character entity.
-func (mquo *MovieQuoteUpdateOne) SetCharacter(c *Character) *MovieQuoteUpdateOne {
-	return mquo.SetCharacterID(c.ID)
+// SetNillableLanguageID sets the "language" edge to the Language entity by ID if the given value is not nil.
+func (mquo *MovieQuoteUpdateOne) SetNillableLanguageID(id *int) *MovieQuoteUpdateOne {
+	if id != nil {
+		mquo = mquo.SetLanguageID(*id)
+	}
+	return mquo
+}
+
+// SetLanguage sets the "language" edge to the Language entity.
+func (mquo *MovieQuoteUpdateOne) SetLanguage(l *Language) *MovieQuoteUpdateOne {
+	return mquo.SetLanguageID(l.ID)
 }
 
 // Mutation returns the MovieQuoteMutation object of the builder.
@@ -265,9 +347,9 @@ func (mquo *MovieQuoteUpdateOne) ClearMovie() *MovieQuoteUpdateOne {
 	return mquo
 }
 
-// ClearCharacter clears the "character" edge to the Character entity.
-func (mquo *MovieQuoteUpdateOne) ClearCharacter() *MovieQuoteUpdateOne {
-	mquo.mutation.ClearCharacter()
+// ClearLanguage clears the "language" edge to the Language entity.
+func (mquo *MovieQuoteUpdateOne) ClearLanguage() *MovieQuoteUpdateOne {
+	mquo.mutation.ClearLanguage()
 	return mquo
 }
 
@@ -286,6 +368,7 @@ func (mquo *MovieQuoteUpdateOne) Select(field string, fields ...string) *MovieQu
 
 // Save executes the query and returns the updated MovieQuote entity.
 func (mquo *MovieQuoteUpdateOne) Save(ctx context.Context) (*MovieQuote, error) {
+	mquo.defaults()
 	return withHooks(ctx, mquo.sqlSave, mquo.mutation, mquo.hooks)
 }
 
@@ -311,18 +394,20 @@ func (mquo *MovieQuoteUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (mquo *MovieQuoteUpdateOne) defaults() {
+	if _, ok := mquo.mutation.UpdatedAt(); !ok {
+		v := moviequote.UpdateDefaultUpdatedAt()
+		mquo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mquo *MovieQuoteUpdateOne) check() error {
 	if v, ok := mquo.mutation.Quote(); ok {
 		if err := moviequote.QuoteValidator(v); err != nil {
 			return &ValidationError{Name: "quote", err: fmt.Errorf(`ent: validator failed for field "MovieQuote.quote": %w`, err)}
 		}
-	}
-	if mquo.mutation.MovieCleared() && len(mquo.mutation.MovieIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "MovieQuote.movie"`)
-	}
-	if mquo.mutation.CharacterCleared() && len(mquo.mutation.CharacterIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "MovieQuote.character"`)
 	}
 	return nil
 }
@@ -356,8 +441,14 @@ func (mquo *MovieQuoteUpdateOne) sqlSave(ctx context.Context) (_node *MovieQuote
 			}
 		}
 	}
+	if value, ok := mquo.mutation.UpdatedAt(); ok {
+		_spec.SetField(moviequote.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := mquo.mutation.Quote(); ok {
 		_spec.SetField(moviequote.FieldQuote, field.TypeString, value)
+	}
+	if value, ok := mquo.mutation.Context(); ok {
+		_spec.SetField(moviequote.FieldContext, field.TypeString, value)
 	}
 	if mquo.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -388,28 +479,28 @@ func (mquo *MovieQuoteUpdateOne) sqlSave(ctx context.Context) (_node *MovieQuote
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if mquo.mutation.CharacterCleared() {
+	if mquo.mutation.LanguageCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   moviequote.CharacterTable,
-			Columns: []string{moviequote.CharacterColumn},
+			Table:   moviequote.LanguageTable,
+			Columns: []string{moviequote.LanguageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(language.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mquo.mutation.CharacterIDs(); len(nodes) > 0 {
+	if nodes := mquo.mutation.LanguageIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   moviequote.CharacterTable,
-			Columns: []string{moviequote.CharacterColumn},
+			Table:   moviequote.LanguageTable,
+			Columns: []string{moviequote.LanguageColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(language.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

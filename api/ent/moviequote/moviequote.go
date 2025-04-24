@@ -3,6 +3,8 @@
 package moviequote
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -12,12 +14,18 @@ const (
 	Label = "movie_quote"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldQuote holds the string denoting the quote field in the database.
 	FieldQuote = "quote"
+	// FieldContext holds the string denoting the context field in the database.
+	FieldContext = "context"
 	// EdgeMovie holds the string denoting the movie edge name in mutations.
 	EdgeMovie = "movie"
-	// EdgeCharacter holds the string denoting the character edge name in mutations.
-	EdgeCharacter = "character"
+	// EdgeLanguage holds the string denoting the language edge name in mutations.
+	EdgeLanguage = "language"
 	// Table holds the table name of the moviequote in the database.
 	Table = "movie_quotes"
 	// MovieTable is the table that holds the movie relation/edge.
@@ -27,25 +35,28 @@ const (
 	MovieInverseTable = "movies"
 	// MovieColumn is the table column denoting the movie relation/edge.
 	MovieColumn = "movie_quotes"
-	// CharacterTable is the table that holds the character relation/edge.
-	CharacterTable = "movie_quotes"
-	// CharacterInverseTable is the table name for the Character entity.
-	// It exists in this package in order to avoid circular dependency with the "character" package.
-	CharacterInverseTable = "characters"
-	// CharacterColumn is the table column denoting the character relation/edge.
-	CharacterColumn = "character_quotes"
+	// LanguageTable is the table that holds the language relation/edge.
+	LanguageTable = "movie_quotes"
+	// LanguageInverseTable is the table name for the Language entity.
+	// It exists in this package in order to avoid circular dependency with the "language" package.
+	LanguageInverseTable = "languages"
+	// LanguageColumn is the table column denoting the language relation/edge.
+	LanguageColumn = "language_quotes"
 )
 
 // Columns holds all SQL columns for moviequote fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldQuote,
+	FieldContext,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "movie_quotes"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"character_quotes",
+	"language_quotes",
 	"movie_quotes",
 }
 
@@ -65,6 +76,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// QuoteValidator is a validator for the "quote" field. It is called by the builders before save.
 	QuoteValidator func(string) error
 )
@@ -77,9 +94,24 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
 // ByQuote orders the results by the quote field.
 func ByQuote(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuote, opts...).ToFunc()
+}
+
+// ByContext orders the results by the context field.
+func ByContext(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContext, opts...).ToFunc()
 }
 
 // ByMovieField orders the results by movie field.
@@ -89,10 +121,10 @@ func ByMovieField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByCharacterField orders the results by character field.
-func ByCharacterField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByLanguageField orders the results by language field.
+func ByLanguageField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCharacterStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newLanguageStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newMovieStep() *sqlgraph.Step {
@@ -102,10 +134,10 @@ func newMovieStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, MovieTable, MovieColumn),
 	)
 }
-func newCharacterStep() *sqlgraph.Step {
+func newLanguageStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CharacterInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, CharacterTable, CharacterColumn),
+		sqlgraph.To(LanguageInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LanguageTable, LanguageColumn),
 	)
 }

@@ -1,25 +1,35 @@
 services:
-  database:
+  db:
     image: postgres:latest
     ports:
       - 5432:5432
     env_file:
       - .env.${DEV_ENV:-example}
     networks:
-      - database-network
+      - db-network
     volumes:
-      - database-data:/var/lib/postgresql/data/
+      - db-data:/var/lib/postgresql/data/
       # - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql # SQL script for seeding db with data
-    # healthcheck:
-    #   test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-    #   interval: 10s
-    #   retries: 5
-    #   start_period: 30s
-    #   timeout: 10s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --host=localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  db-test:
+    image: postgres:17-alpine
+    ports:
+      - 5444:5432
+    environment:
+      - POSTGRES_DB=testdb
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
 
 networks:
-  database-network:
+  db-network:
     driver: bridge
+  
 
 volumes:
-  database-data:
+  db-data:

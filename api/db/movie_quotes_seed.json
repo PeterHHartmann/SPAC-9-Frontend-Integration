@@ -1,608 +1,812 @@
 [
   {
-    "movie": "Goodfellas",
-    "year": 1990,
-    "character": "Hannibal Lecter",
-    "quote": "To infinity... and beyond!"
+    "quote": "Life’s simple. You make choices and you don’t look back",
+    "movie": "The Fast and The Furious: Tokyo Drift",
+    "character": "Han Lue",
+    "actor": "Sung Kang",
+    "category": "Action",
+    "year": 2006,
+    "context": "",
+    "language": "English"
   },
   {
-    "movie": "Star Wars: Episode IV - A New Hope",
-    "year": 1977,
-    "character": "Vincent Vega",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
+    "quote": "Life’s simple. You make choices and you don’t look back",
+    "movie": "The Fast and The Furious: Tokyo Drift",
+    "character": "Han Lue",
+    "actor": "Sung Kang",
+    "category": "Action",
+    "year": 2006,
+    "context": "",
+    "language": "English"
   },
   {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Dr. Alan Grant",
-    "quote": "Hold on to your butts."
+    "quote": "Hasta la vista, baby.",
+    "movie": "Terminator 2: Judgment Day",
+    "character": "The Terminator",
+    "actor": "Arnold Schwarzenegger",
+    "category": "Science Fiction/Action",
+    "year": 1991,
+    "context": "The Terminator's iconic catchphrase.",
+    "language": "English"
   },
   {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Woody",
-    "quote": "Hold on to your butts."
+    "quote": "I see you.",
+    "movie": "Avatar",
+    "character": "Jake Sully",
+    "actor": "Sam Worthington",
+    "category": "Science Fiction/Adventure",
+    "year": 2009,
+    "context": "Jake's phrase in the Na'vi language.",
+    "language": "Na'vi (Fictional language)"
   },
   {
+    "quote": "Love means never having to say you're sorry.",
+    "movie": "Love Story",
+    "character": "Oliver Barrett IV",
+    "actor": "Ryan O'Neal",
+    "category": "Drama/Romance",
+    "year": 1970,
+    "context": "A famous romantic line from the film.",
+    "language": "English"
+  },
+  {
+    "quote": "You had me at 'Hello.'",
+    "movie": "Jerry Maguire",
+    "character": "Dorothy Boyd",
+    "actor": "Renée Zellweger",
+    "category": "Drama/Romance",
+    "year": 1996,
+    "context": "Dorothy's response to Jerry's heartfelt speech.",
+    "language": "English"
+  },
+  {
+    "quote": "I'm the king of the world!",
+    "movie": "Titanic",
+    "character": "Jack Dawson",
+    "actor": "Leonardo DiCaprio",
+    "category": "Romance/Drama",
+    "year": 1997,
+    "context": "Jack's exuberant moment on the Titanic's bow.",
+    "language": "English"
+  },
+  {
+    "quote": "I'm not a smart man, but I know what love is.",
     "movie": "Forrest Gump",
-    "year": 1994,
-    "character": "Dr. Alan Grant",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
-  },
-  {
-    "movie": "The Shawshank Redemption",
-    "year": 1994,
     "character": "Forrest Gump",
-    "quote": "I feel the need\u2014the need for speed."
-  },
-  {
-    "movie": "Goodfellas",
-    "year": 1990,
-    "character": "Jack Dawson",
-    "quote": "They may take our lives, but they'll never take our freedom!"
-  },
-  {
-    "movie": "Forrest Gump",
+    "actor": "Tom Hanks",
+    "category": "Drama/Comedy",
     "year": 1994,
-    "character": "Andy Dufresne",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Vito Corleone",
-    "quote": "I'm gonna make him an offer he can't refuse."
-  },
-  {
-    "movie": "The Shawshank Redemption",
-    "year": 1994,
-    "character": "Neo",
-    "quote": "Hakuna Matata!"
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "Vincent Vega",
-    "quote": "The first rule of Fight Club is: you do not talk about Fight Club."
-  },
-  {
-    "movie": "Jurassic Park",
-    "year": 1993,
-    "character": "Neo",
-    "quote": "Nobody puts Baby in a corner."
-  },
-  {
-    "movie": "Star Wars: Episode IV - A New Hope",
-    "year": 1977,
-    "character": "Simba",
-    "quote": "Say 'what' again. I dare you!"
-  },
-  {
-    "movie": "Toy Story",
-    "year": 1995,
-    "character": "Henry Hill",
-    "quote": "May the Force be with you."
-  },
-  {
-    "movie": "Back to the Future",
-    "year": 1985,
-    "character": "Vito Corleone",
-    "quote": "Here's looking at you, kid."
-  },
-  {
-    "movie": "Inception",
-    "year": 2010,
-    "character": "William Wallace",
-    "quote": "To infinity... and beyond!"
-  },
-  {
-    "movie": "Inception",
-    "year": 2010,
-    "character": "Dom Cobb",
-    "quote": "They may take our lives, but they'll never take our freedom!"
-  },
-  {
-    "movie": "The Lion King",
-    "year": 1994,
-    "character": "Vito Corleone",
-    "quote": "May the Force be with you."
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "Vito Corleone",
-    "quote": "I'm walking here! I'm walking here!"
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "Jack Dawson",
-    "quote": "To infinity... and beyond!"
-  },
-  {
-    "movie": "Gladiator",
-    "year": 2000,
-    "character": "Vito Corleone",
-    "quote": "There is no spoon."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Jack Dawson",
-    "quote": "Keep your friends close, but your enemies closer."
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Henry Hill",
-    "quote": "Keep your friends close, but your enemies closer."
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "The Terminator",
-    "quote": "Get busy living, or get busy dying."
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "Hannibal Lecter",
-    "quote": "The first rule of Fight Club is: you do not talk about Fight Club."
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Andy Dufresne",
-    "quote": "There is no spoon."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Neo",
-    "quote": "I feel the need\u2014the need for speed."
-  },
-  {
-    "movie": "Jurassic Park",
-    "year": 1993,
-    "character": "The Joker",
-    "quote": "As far back as I can remember, I always wanted to be a gangster."
-  },
-  {
-    "movie": "Forrest Gump",
-    "year": 1994,
-    "character": "Marty McFly",
-    "quote": "Are you not entertained?"
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Hannibal Lecter",
-    "quote": "Nobody puts Baby in a corner."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Andy Dufresne",
-    "quote": "Houston, we have a problem."
-  },
-  {
-    "movie": "Pulp Fiction",
-    "year": 1994,
-    "character": "Woody",
-    "quote": "You had me at 'hello'."
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Forrest Gump",
-    "quote": "A census taker once tried to test me. I ate his liver with some fava beans."
-  },
-  {
-    "movie": "The Silence of the Lambs",
-    "year": 1991,
-    "character": "Henry Hill",
-    "quote": "You're gonna need a bigger boat."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Vincent Vega",
-    "quote": "Life is like a box of chocolates."
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Henry Hill",
-    "quote": "Houston, we have a problem."
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Tyler Durden",
-    "quote": "You had me at 'hello'."
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Dom Cobb",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
-  },
-  {
-    "movie": "Pulp Fiction",
-    "year": 1994,
-    "character": "Jack Dawson",
-    "quote": "There is no spoon."
-  },
-  {
-    "movie": "The Shawshank Redemption",
-    "year": 1994,
-    "character": "Luke Skywalker",
-    "quote": "You can't handle the truth!"
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "The Joker",
-    "quote": "Roads? Where we're going, we don't need roads."
-  },
-  {
-    "movie": "Inception",
-    "year": 2010,
-    "character": "Vito Corleone",
-    "quote": "You can't handle the truth!"
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Tyler Durden",
-    "quote": "Houston, we have a problem."
-  },
-  {
-    "movie": "Titanic",
-    "year": 1997,
-    "character": "Andy Dufresne",
-    "quote": "Get busy living, or get busy dying."
-  },
-  {
-    "movie": "Goodfellas",
-    "year": 1990,
-    "character": "Vito Corleone",
-    "quote": "May the Force be with you."
-  },
-  {
-    "movie": "Pulp Fiction",
-    "year": 1994,
-    "character": "Andy Dufresne",
-    "quote": "Hold on to your butts."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Maximus",
-    "quote": "I feel the need\u2014the need for speed."
-  },
-  {
-    "movie": "Toy Story",
-    "year": 1995,
-    "character": "Dr. Alan Grant",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
-  },
-  {
-    "movie": "Toy Story",
-    "year": 1995,
-    "character": "The Terminator",
-    "quote": "To infinity... and beyond!"
-  },
-  {
-    "movie": "Jurassic Park",
-    "year": 1993,
-    "character": "The Terminator",
-    "quote": "May the Force be with you."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Dom Cobb",
-    "quote": "Get busy living, or get busy dying."
-  },
-  {
-    "movie": "Fight Club",
-    "year": 1999,
-    "character": "Hannibal Lecter",
-    "quote": "I feel the need\u2014the need for speed."
-  },
-  {
-    "movie": "Toy Story",
-    "year": 1995,
-    "character": "William Wallace",
-    "quote": "Are you not entertained?"
-  },
-  {
-    "movie": "Goodfellas",
-    "year": 1990,
-    "character": "Woody",
-    "quote": "I'm gonna make him an offer he can't refuse."
-  },
-  {
-    "movie": "The Lion King",
-    "year": 1994,
-    "character": "Maximus",
-    "quote": "Even the smallest person can change the course of the future."
-  },
-  {
-    "movie": "Inception",
-    "year": 2010,
-    "character": "Frodo Baggins",
-    "quote": "Get busy living, or get busy dying."
-  },
-  {
-    "movie": "The Silence of the Lambs",
-    "year": 1991,
-    "character": "Neo",
-    "quote": "Nobody puts Baby in a corner."
-  },
-  {
-    "movie": "Star Wars: Episode IV - A New Hope",
-    "year": 1977,
-    "character": "Marty McFly",
-    "quote": "There is no spoon."
-  },
-  {
-    "movie": "Back to the Future",
-    "year": 1985,
-    "character": "Maximus",
-    "quote": "Houston, we have a problem."
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Luke Skywalker",
-    "quote": "You had me at 'hello'."
-  },
-  {
-    "movie": "The Silence of the Lambs",
-    "year": 1991,
-    "character": "Simba",
-    "quote": "Hakuna Matata!"
-  },
-  {
-    "movie": "Back to the Future",
-    "year": 1985,
-    "character": "Marty McFly",
-    "quote": "There is no spoon."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "Vito Corleone",
-    "quote": "Nobody puts Baby in a corner."
-  },
-  {
-    "movie": "Goodfellas",
-    "year": 1990,
-    "character": "Tyler Durden",
-    "quote": "I'm the king of the world!"
-  },
-  {
-    "movie": "The Dark Knight",
-    "year": 2008,
-    "character": "Maximus",
-    "quote": "Hakuna Matata!"
-  },
-  {
-    "movie": "Star Wars: Episode IV - A New Hope",
-    "year": 1977,
-    "character": "William Wallace",
-    "quote": "I'm walking here! I'm walking here!"
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "William Wallace",
-    "quote": "Get busy living, or get busy dying."
-  },
-  {
-    "movie": "Gladiator",
-    "year": 2000,
-    "character": "Simba",
-    "quote": "Hold on to your butts."
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "Tyler Durden",
-    "quote": "Life is like a box of chocolates."
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Frodo Baggins",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
-  },
-  {
-    "movie": "The Lion King",
-    "year": 1994,
-    "character": "Neo",
-    "quote": "Hakuna Matata!"
-  },
-  {
-    "movie": "The Silence of the Lambs",
-    "year": 1991,
-    "character": "Dom Cobb",
-    "quote": "May the Force be with you."
-  },
-  {
-    "movie": "Forrest Gump",
-    "year": 1994,
-    "character": "Luke Skywalker",
-    "quote": "You can't handle the truth!"
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Marty McFly",
-    "quote": "I'll be back."
-  },
-  {
-    "movie": "The Matrix",
-    "year": 1999,
-    "character": "Marty McFly",
-    "quote": "Here's looking at you, kid."
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "The Joker",
-    "quote": "I'll be back."
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Vincent Vega",
-    "quote": "Are you not entertained?"
-  },
-  {
-    "movie": "Toy Story",
-    "year": 1995,
-    "character": "William Wallace",
-    "quote": "I'll be back."
-  },
-  {
-    "movie": "The Terminator",
+    "context": "Forrest's reflection on love and simplicity.",
+    "language": "English"
+  },
+  {
+    "quote": "It's not who I am underneath, but what I do that defines me.",
+    "movie": "Batman Begins",
+    "character": "Bruce Wayne/Batman",
+    "actor": "Christian Bale",
+    "category": "Superhero/Action",
+    "year": 2005,
+    "context": "Batman's philosophy on identity and actions.",
+    "language": "English"
+  },
+  {
+    "quote": "I am vengeance. I am the night. I am Batman.",
+    "movie": "Batman: The Animated Series (TV Series)",
+    "character": "Voice of Batman",
+    "actor": "Kevin Conroy",
+    "category": "Animation/Superhero",
+    "year": 1992,
+    "context": "Batman's introduction in the animated series.",
+    "language": "English"
+  },
+  {
+    "quote": "Wax on, wax off.",
+    "movie": "The Karate Kid",
+    "character": "Mr. Miyagi",
+    "actor": "Pat Morita",
+    "category": "Drama/Action",
     "year": 1984,
-    "character": "Andy Dufresne",
-    "quote": "There is no spoon."
+    "context": "Mr. Miyagi's teaching method.",
+    "language": "English"
   },
   {
-    "movie": "The Dark Knight",
-    "year": 2008,
-    "character": "Vincent Vega",
-    "quote": "I feel the need\u2014the need for speed."
+    "quote": "Nobody puts Baby in a corner.",
+    "movie": "Dirty Dancing",
+    "character": "Johnny Castle",
+    "actor": "Patrick Swayze",
+    "category": "Romance/Drama",
+    "year": 1987,
+    "context": "Johnny's declaration of love for Baby.",
+    "language": "English"
   },
   {
-    "movie": "Jurassic Park",
-    "year": 1993,
-    "character": "Neo",
-    "quote": "As far back as I can remember, I always wanted to be a gangster."
+    "quote": "To the infinity and beyond!",
+    "movie": "Toy Story 3",
+    "character": "Buzz Lightyear",
+    "actor": "Tim Allen",
+    "category": "Animation/Family",
+    "year": 2010,
+    "context": "Buzz Lightyear's enthusiastic variation of his catchphrase.",
+    "language": "English"
   },
   {
-    "movie": "Back to the Future",
-    "year": 1985,
-    "character": "The Terminator",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
+    "quote": "I'll get you, my pretty, and your little dog too!",
+    "movie": "The Wizard of Oz",
+    "character": "The Wicked Witch of the West",
+    "actor": "Margaret Hamilton",
+    "category": "Fantasy/Adventure",
+    "year": 1939,
+    "context": "The Wicked Witch's threat to Dorothy.",
+    "language": "English"
   },
   {
-    "movie": "Star Wars: Episode IV - A New Hope",
-    "year": 1977,
-    "character": "Maximus",
-    "quote": "You mustn't be afraid to dream a little bigger, darling."
+    "quote": "I could dance with you till the cows come home... on second thought, I'd rather dance with the cows till you come home.",
+    "movie": "Duck Soup",
+    "character": "Rufus T. Firefly",
+    "actor": "Groucho Marx",
+    "category": "Comedy",
+    "year": 1933,
+    "context": "Groucho Marx's humorous line.",
+    "language": "English"
   },
   {
-    "movie": "Fight Club",
-    "year": 1999,
-    "character": "Woody",
-    "quote": "Here's looking at you, kid."
+    "quote": "We're gonna need a bigger boat.",
+    "movie": "Jaws",
+    "character": "Chief Martin Brody",
+    "actor": "Roy Scheider",
+    "category": "Thriller/Horror",
+    "year": 1975,
+    "context": "Chief Brody's realization of the shark's size.",
+    "language": "English"
   },
   {
-    "movie": "The Silence of the Lambs",
-    "year": 1991,
-    "character": "Dr. Alan Grant",
-    "quote": "Say 'what' again. I dare you!"
+    "quote": "I don't want to survive. I want to live.",
+    "movie": "12 Years a Slave",
+    "character": "Solomon Northup",
+    "actor": "Chiwetel Ejiofor",
+    "category": "Drama/History",
+    "year": 2013,
+    "context": "Solomon's expression of his desire for freedom.",
+    "language": "English"
   },
   {
+    "quote": "Life is a banquet, and most poor suckers are starving to death.",
+    "movie": "Auntie Mame",
+    "character": "Auntie Mame Dennis",
+    "actor": "Rosalind Russell",
+    "category": "Comedy/Drama",
+    "year": 1958,
+    "context": "Auntie Mame's lively outlook on life.",
+    "language": "English"
+  },
+  {
+    "quote": "I'm walking here!",
+    "movie": "Midnight Cowboy",
+    "character": "Ratso Rizzo",
+    "actor": "Dustin Hoffman",
+    "category": "Drama",
+    "year": 1969,
+    "context": "A memorable moment in the film's urban setting.",
+    "language": "English"
+  },
+  {
+    "quote": "I am serious. And don't call me Shirley.",
+    "movie": "Airplane!",
+    "character": "Dr. Rumack",
+    "actor": "Leslie Nielsen",
+    "category": "Comedy",
+    "year": 1980,
+    "context": "A humorous exchange in the film.",
+    "language": "English"
+  },
+  {
+    "quote": "It's alive! It's alive!",
+    "movie": "Frankenstein",
+    "character": "Dr. Henry Frankenstein",
+    "actor": "Colin Clive",
+    "category": "Horror/Science Fiction",
+    "year": 1931,
+    "context": "Dr. Frankenstein's declaration upon reanimating the creature.",
+    "language": "English"
+  },
+  {
+    "quote": "This is the start of a beautiful friendship.",
+    "movie": "Casablanca",
+    "character": "Rick Blaine",
+    "actor": "Humphrey Bogart",
+    "category": "Romance/Drama",
+    "year": 1942,
+    "context": "The closing line of the film, symbolizing a new beginning.",
+    "language": "English"
+  },
+  {
+    "quote": "Go ahead, make my day.",
+    "movie": "Sudden Impact",
+    "character": "Harry Callahan",
+    "actor": "Clint Eastwood",
+    "category": "Action/Crime",
+    "year": 1983,
+    "context": "Harry Callahan's famous line before taking action.",
+    "language": "English"
+  },
+  {
+    "quote": "A martini. Shaken, not stirred.",
+    "movie": "James Bond franchise",
+    "character": "James Bond",
+    "actor": "Sean Connery, Roger Moore, various",
+    "category": "Spy/Action",
+    "year": 2015,
+    "context": "James Bond's preferred way to have a martini.",
+    "language": "English"
+  },
+  {
+    "quote": "Houston, we have a problem.",
+    "movie": "Apollo 13",
+    "character": "Jim Lovell",
+    "actor": "Tom Hanks",
+    "category": "Drama/History",
+    "year": 1995,
+    "context": "Jim Lovell's report of an issue during the Apollo 13 mission.",
+    "language": "English"
+  },
+  {
+    "quote": "If you build it, he will come.",
+    "movie": "Field of Dreams",
+    "character": "Ray Kinsella",
+    "actor": "Kevin Costner",
+    "category": "Drama/Fantasy",
+    "year": 1989,
+    "context": "A mysterious message that drives the film's plot.",
+    "language": "English"
+  },
+  {
+    "quote": "I am Groot.",
+    "movie": "Guardians of the Galaxy",
+    "character": "Voice of Groot",
+    "actor": "Vin Diesel",
+    "category": "Superhero/Science Fiction",
+    "year": 2014,
+    "context": "Groot's catchphrase, which means different things based on intonation.",
+    "language": "Groot's language (limited vocabulary)"
+  },
+  {
+    "quote": "I love the smell of napalm in the morning.",
+    "movie": "Apocalypse Now",
+    "character": "Lt. Col. Kilgore",
+    "actor": "Robert Duvall",
+    "category": "War/Drama",
+    "year": 1979,
+    "context": "Lt. Col. Kilgore's memorable line during a military operation.",
+    "language": "English"
+  },
+  {
+    "quote": "What we've got here is a failure to communicate.",
+    "movie": "Cool Hand Luke",
+    "character": "Captain",
+    "actor": "Strother Martin",
+    "category": "Drama/Crime",
+    "year": 1967,
+    "context": "The Captain's explanation of a recurring issue.",
+    "language": "English"
+  },
+  {
+    "quote": "They may take our lives, but they'll never take our freedom!",
+    "movie": "Braveheart",
+    "character": "William Wallace",
+    "actor": "Mel Gibson",
+    "category": "Historical/Drama",
+    "year": 1995,
+    "context": "William Wallace's rallying cry for Scottish independence.",
+    "language": "English"
+  },
+  {
+    "quote": "I'm gonna make him an offer he can't refuse.",
     "movie": "The Godfather",
+    "character": "Don Vito Corleone",
+    "actor": "Marlon Brando",
+    "category": "Crime/Drama",
     "year": 1972,
-    "character": "Woody",
-    "quote": "To infinity... and beyond!"
+    "context": "Don Vito Corleone's strategy in dealing with an adversary.",
+    "language": "English"
   },
   {
+    "quote": "Here's Johnny!",
+    "movie": "The Shining",
+    "character": "Jack Torrance",
+    "actor": "Jack Nicholson",
+    "category": "Horror/Thriller",
+    "year": 1980,
+    "context": "Jack Torrance's iconic entrance.",
+    "language": "English"
+  },
+  {
+    "quote": "I'm king of the world!",
+    "movie": "Titanic",
+    "character": "Jack Dawson",
+    "actor": "Leonardo DiCaprio",
+    "category": "Romance/Drama",
+    "year": 1997,
+    "context": "Jack's exuberant moment on the Titanic's bow.",
+    "language": "English"
+  },
+  {
+    "quote": "I'm not a smart man, but I know what love is.",
     "movie": "Forrest Gump",
-    "year": 1994,
-    "character": "Hannibal Lecter",
-    "quote": "Even the smallest person can change the course of the future."
-  },
-  {
-    "movie": "The Shawshank Redemption",
-    "year": 1994,
-    "character": "William Wallace",
-    "quote": "Hasta la vista, baby."
-  },
-  {
-    "movie": "Fight Club",
-    "year": 1999,
-    "character": "Hannibal Lecter",
-    "quote": "To infinity... and beyond!"
-  },
-  {
-    "movie": "Braveheart",
-    "year": 1995,
-    "character": "The Terminator",
-    "quote": "Nobody puts Baby in a corner."
-  },
-  {
-    "movie": "Goodfellas",
-    "year": 1990,
-    "character": "Dr. Alan Grant",
-    "quote": "As far back as I can remember, I always wanted to be a gangster."
-  },
-  {
-    "movie": "The Terminator",
-    "year": 1984,
-    "character": "Tyler Durden",
-    "quote": "Why so serious?"
-  },
-  {
-    "movie": "Gladiator",
-    "year": 2000,
-    "character": "Dom Cobb",
-    "quote": "Hasta la vista, baby."
-  },
-  {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
     "character": "Forrest Gump",
-    "quote": "There is no spoon."
+    "actor": "Tom Hanks",
+    "category": "Drama/Comedy",
+    "year": 1994,
+    "context": "Forrest's reflection on love and simplicity.",
+    "language": "English"
   },
   {
-    "movie": "The Lord of the Rings: The Fellowship of the Ring",
-    "year": 2001,
-    "character": "Andy Dufresne",
-    "quote": "Hasta la vista, baby."
+    "quote": "It's not who I am underneath, but what I do that defines me.",
+    "movie": "Batman Begins",
+    "character": "Bruce Wayne/Batman",
+    "actor": "Christian Bale",
+    "category": "Superhero/Action",
+    "year": 2005,
+    "context": "Batman's philosophy on identity and actions.",
+    "language": "English"
   },
   {
-    "movie": "Back to the Future",
-    "year": 1985,
-    "character": "Tyler Durden",
-    "quote": "I'm gonna make him an offer he can't refuse."
+    "quote": "I am vengeance. I am the night. I am Batman.",
+    "movie": "Batman: The Animated Series (TV Series)",
+    "character": "Voice of Batman",
+    "actor": "Kevin Conroy",
+    "category": "Animation/Superhero",
+    "year": 1992,
+    "context": "Batman's introduction in the animated series.",
+    "language": "English"
   },
   {
-    "movie": "The Dark Knight",
-    "year": 2008,
-    "character": "Hannibal Lecter",
-    "quote": "You're gonna need a bigger boat."
+    "quote": "Wax on, wax off.",
+    "movie": "The Karate Kid",
+    "character": "Mr. Miyagi",
+    "actor": "Pat Morita",
+    "category": "Drama/Action",
+    "year": 1984,
+    "context": "Mr. Miyagi's teaching method.",
+    "language": "English"
   },
   {
-    "movie": "The Dark Knight",
-    "year": 2008,
-    "character": "Hannibal Lecter",
-    "quote": "Houston, we have a problem."
+    "quote": "Nobody puts Baby in a corner.",
+    "movie": "Dirty Dancing",
+    "character": "Johnny Castle",
+    "actor": "Patrick Swayze",
+    "category": "Romance/Drama",
+    "year": 1987,
+    "context": "Johnny's declaration of love for Baby.",
+    "language": "English"
   },
   {
-    "movie": "The Dark Knight",
-    "year": 2008,
-    "character": "Frodo Baggins",
-    "quote": "Get busy living, or get busy dying."
+    "quote": "To the infinity and beyond!",
+    "movie": "Toy Story 3",
+    "character": "Buzz Lightyear",
+    "actor": "Tim Allen",
+    "category": "Animation/Family",
+    "year": 2010,
+    "context": "Buzz Lightyear's enthusiastic variation of his catchphrase.",
+    "language": "English"
   },
   {
+    "quote": "I'll get you, my pretty, and your little dog too!",
+    "movie": "The Wizard of Oz",
+    "character": "The Wicked Witch of the West",
+    "actor": "Margaret Hamilton",
+    "category": "Fantasy/Adventure",
+    "year": 1939,
+    "context": "The Wicked Witch's threat to Dorothy.",
+    "language": "English"
+  },
+  {
+    "quote": "May the Force be with you.",
+    "movie": "Star Wars",
+    "character": "Various Characters",
+    "actor": "Various",
+    "category": "Science Fiction/Adventure",
+    "year": 1977,
+    "context": "A common expression in the Star Wars universe.",
+    "language": "English"
+  },
+  {
+    "quote": "There's no place like home.",
+    "movie": "The Wizard of Oz",
+    "character": "Dorothy",
+    "actor": "Judy Garland",
+    "category": "Fantasy/Adventure",
+    "year": 1939,
+    "context": "Dorothy's longing for her home in Kansas.",
+    "language": "English"
+  },
+  {
+    "quote": "Here's looking at you, kid.",
+    "movie": "Casablanca",
+    "character": "Rick Blaine",
+    "actor": "Humphrey Bogart",
+    "category": "Romance/Drama",
+    "year": 1942,
+    "context": "Rick's fond farewell to Ilsa.",
+    "language": "English"
+  },
+  {
+    "quote": "You can't handle the truth!",
+    "movie": "A Few Good Men",
+    "character": "Colonel Nathan R. Jessep",
+    "actor": "Jack Nicholson",
+    "category": "Drama/Crime",
+    "year": 1992,
+    "context": "A heated courtroom confrontation.",
+    "language": "English"
+  },
+  {
+    "quote": "To infinity and beyond!",
     "movie": "Toy Story",
+    "character": "Buzz Lightyear",
+    "actor": "Tim Allen",
+    "category": "Animation/Family",
     "year": 1995,
-    "character": "The Joker",
-    "quote": "Hakuna Matata!"
+    "context": "Buzz Lightyear's catchphrase.",
+    "language": "English"
   },
   {
-    "movie": "Back to the Future",
-    "year": 1985,
+    "quote": "May the odds be ever in your favor.",
+    "movie": "The Hunger Games",
+    "character": "Various Characters",
+    "actor": "Various",
+    "category": "Science Fiction/Adventure",
+    "year": 2012,
+    "context": "A common expression in the Hunger Games world.",
+    "language": "English"
+  },
+  {
+    "quote": "You is kind. You is smart. You is important.",
+    "movie": "The Help",
+    "character": "Aibileen Clark",
+    "actor": "Viola Davis",
+    "category": "Drama",
+    "year": 2011,
+    "context": "Aibileen's loving words to a child.",
+    "language": "English"
+  },
+  {
+    "quote": "Keep your friends close, but your enemies closer.",
+    "movie": "The Godfather Part II",
+    "character": "Michael Corleone",
+    "actor": "Al Pacino",
+    "category": "Crime/Drama",
+    "year": 1974,
+    "context": "Michael Corleone's advice on strategy.",
+    "language": "English"
+  },
+  {
+    "quote": "I see dead people.",
+    "movie": "The Sixth Sense",
+    "character": "Cole Sear",
+    "actor": "Haley Joel Osment",
+    "category": "Thriller/Drama",
+    "year": 1999,
+    "context": "Cole Sear's revelation about his ability.",
+    "language": "English"
+  },
+  {
+    "quote": "This is the beginning of a beautiful friendship.",
+    "movie": "Casablanca",
+    "character": "Rick Blaine",
+    "actor": "Humphrey Bogart",
+    "category": "Romance/Drama",
+    "year": 1942,
+    "context": "Rick and Renault's camaraderie.",
+    "language": "English"
+  },
+  {
+    "quote": "I can't carry it for you, but I can carry you.",
+    "movie": "The Lord of the Rings: The Return of the King",
+    "character": "Samwise Gamgee",
+    "actor": "Sean Astin",
+    "category": "Fantasy/Adventure",
+    "year": 2003,
+    "context": "Samwise's determination to help Frodo.",
+    "language": "English"
+  },
+  {
+    "quote": "I feel the need - the need for speed.",
+    "movie": "Top Gun",
+    "character": "Maverick",
+    "actor": "Tom Cruise",
+    "category": "Action/Drama",
+    "year": 1986,
+    "context": "Maverick's enthusiasm for fast flying.",
+    "language": "English"
+  },
+  {
+    "quote": "There's no crying in baseball!",
+    "movie": "A League of Their Own",
+    "character": "Jimmy Dugan",
+    "actor": "Tom Hanks",
+    "category": "Comedy/Drama",
+    "year": 1992,
+    "context": "Jimmy Dugan's reaction to emotional players.",
+    "language": "English"
+  },
+  {
+    "quote": "You talking to me?",
+    "movie": "Taxi Driver",
+    "character": "Travis Bickle",
+    "actor": "Robert De Niro",
+    "category": "Crime/Drama",
+    "year": 1976,
+    "context": "Travis Bickle's intense monologue in front of a mirror.",
+    "language": "English"
+  },
+  {
+    "quote": "I'll be back.",
+    "movie": "The Terminator",
+    "character": "The Terminator",
+    "actor": "Arnold Schwarzenegger",
+    "category": "Science Fiction/Action",
+    "year": 1984,
+    "context": "The Terminator's promise to return.",
+    "language": "English"
+  },
+  {
+    "quote": "Life is like a box of chocolates; you never know what you're gonna get.",
+    "movie": "Forrest Gump",
+    "character": "Forrest Gump",
+    "actor": "Tom Hanks",
+    "category": "Drama/Comedy",
+    "year": 1994,
+    "context": "Forrest's philosophical reflection on life.",
+    "language": "English"
+  },
+  {
+    "quote": "I am the danger. A guy opens his door and gets shot, and you think that of me? No. I am the one who knocks!",
+    "movie": "Breaking Bad (TV Series)",
+    "character": "Walter White",
+    "actor": "Bryan Cranston",
+    "category": "Crime/Drama (TV Series)",
+    "year": 2008,
+    "context": "Walter White's transformation into a drug lord.",
+    "language": "English"
+  },
+  {
+    "quote": "Winter is coming.",
+    "movie": "Game of Thrones (TV Series)",
+    "character": "Eddard Stark",
+    "actor": "Sean Bean",
+    "category": "Fantasy/Drama (TV Series)",
+    "year": 2011,
+    "context": "The ominous warning of impending danger in the series.",
+    "language": "English"
+  },
+  {
+    "quote": "I am not a hero. I am a high-functioning sociopath.",
+    "movie": "Sherlock (TV Series)",
+    "character": "Sherlock Holmes",
+    "actor": "Benedict Cumberbatch",
+    "category": "Mystery/Crime (TV Series)",
+    "year": 2010,
+    "context": "Sherlock Holmes' self-description.",
+    "language": "English"
+  },
+  {
+    "quote": "I have nothing to prove to you.",
+    "movie": "Captain Marvel",
+    "character": "Carol Danvers/Captain Marvel",
+    "actor": "Brie Larson",
+    "category": "Superhero/Action",
+    "year": 2019,
+    "context": "Captain Marvel's assertion of her abilities.",
+    "language": "English"
+  },
+  {
+    "quote": "Why so serious?",
+    "movie": "The Dark Knight",
+    "character": "The Joker",
+    "actor": "Heath Ledger",
+    "category": "Superhero/Crime",
+    "year": 2008,
+    "context": "The Joker's iconic question to his victims.",
+    "language": "English"
+  },
+  {
+    "quote": "I am vengeance. I am the night. I am Batman.",
+    "movie": "Batman: The Animated Series (TV Series)",
+    "character": "Voice of Batman",
+    "actor": "Kevin Conroy",
+    "category": "Animation/Superhero (TV Series)",
+    "year": 1992,
+    "context": "Batman's introduction in the animated series.",
+    "language": "English"
+  },
+  {
+    "quote": "I'll be there for you.",
+    "movie": "Friends (TV Series)",
+    "character": "Theme Song",
+    "actor": "The Rembrandts",
+    "category": "Comedy/Romance (TV Series)",
+    "year": 1994,
+    "context": "The iconic theme song of the series.",
+    "language": "English"
+  },
+  {
+    "quote": "We are all stories in the end. Just make it a good one, eh?",
+    "movie": "Doctor Who (TV Series)",
+    "character": "The Doctor",
+    "actor": "Matt Smith",
+    "category": "Science Fiction/Adventure (TV Series)",
+    "year": 2005,
+    "context": "The Doctor's perspective on life and time.",
+    "language": "English"
+  },
+  {
+    "quote": "I have nothing to lose.",
+    "movie": "Breaking Bad (TV Series)",
+    "character": "Walter White",
+    "actor": "Bryan Cranston",
+    "category": "Crime/Drama (TV Series)",
+    "year": 2008,
+    "context": "Walter White's transformation into a drug lord.",
+    "language": "English"
+  },
+  {
+    "quote": "Winter is coming.",
+    "movie": "Game of Thrones (TV Series)",
+    "character": "Eddard Stark",
+    "actor": "Sean Bean",
+    "category": "Fantasy/Drama (TV Series)",
+    "year": 2011,
+    "context": "The ominous warning of impending danger in the series.",
+    "language": "English"
+  },
+  {
+    "quote": "I am not a hero. I am a high-functioning sociopath.",
+    "movie": "Sherlock (TV Series)",
+    "character": "Sherlock Holmes",
+    "actor": "Benedict Cumberbatch",
+    "category": "Mystery/Crime (TV Series)",
+    "year": 2010,
+    "context": "Sherlock Holmes' self-description.",
+    "language": "English"
+  },
+  {
+    "quote": "I have nothing to prove to you.",
+    "movie": "Captain Marvel",
+    "character": "Carol Danvers/Captain Marvel",
+    "actor": "Brie Larson",
+    "category": "Superhero/Action",
+    "year": 2019,
+    "context": "Captain Marvel's assertion of her abilities.",
+    "language": "English"
+  },
+  {
+    "quote": "Why so serious?",
+    "movie": "The Dark Knight",
+    "character": "The Joker",
+    "actor": "Heath Ledger",
+    "category": "Superhero/Crime",
+    "year": 2008,
+    "context": "The Joker's iconic question to his victims.",
+    "language": "English"
+  },
+  {
+    "quote": "I am vengeance. I am the night. I am Batman.",
+    "movie": "Batman: The Animated Series (TV Series)",
+    "character": "Voice of Batman",
+    "actor": "Kevin Conroy",
+    "category": "Animation/Superhero (TV Series)",
+    "year": 1992,
+    "context": "Batman's introduction in the animated series.",
+    "language": "English"
+  },
+  {
+    "quote": "I'll be there for you.",
+    "movie": "Friends (TV Series)",
+    "character": "Theme Song",
+    "actor": "The Rembrandts",
+    "category": "Comedy/Romance (TV Series)",
+    "year": 1994,
+    "context": "The iconic theme song of the series.",
+    "language": "English"
+  },
+  {
+    "quote": "I am Groot.",
+    "movie": "Guardians of the Galaxy",
+    "character": "Voice of Groot",
+    "actor": "Vin Diesel",
+    "category": "Superhero/Science Fiction",
+    "year": 2014,
+    "context": "Groot's catchphrase, which means different things based on intonation.",
+    "language": "Groot's language (limited vocabulary)"
+  },
+  {
+    "quote": "To be or not to be, that is the question.",
+    "movie": "Hamlet",
+    "character": "Hamlet",
+    "actor": "Various",
+    "category": "Drama",
+    "year": 2015,
+    "context": "Hamlet's famous soliloquy.",
+    "language": "English (in the original play)"
+  },
+  {
+    "quote": "I love the smell of napalm in the morning.",
+    "movie": "Apocalypse Now",
+    "character": "Lt. Col. Kilgore",
+    "actor": "Robert Duvall",
+    "category": "War/Drama",
+    "year": 1979,
+    "context": "Lt. Col. Kilgore's memorable line during a military operation.",
+    "language": "English"
+  },
+  {
+    "quote": "What we've got here is a failure to communicate.",
+    "movie": "Cool Hand Luke",
+    "character": "Captain",
+    "actor": "Strother Martin",
+    "category": "Drama/Crime",
+    "year": 1967,
+    "context": "The Captain's explanation of a recurring issue.",
+    "language": "English"
+  },
+  {
+    "quote": "They may take our lives, but they'll never take our freedom!",
+    "movie": "Braveheart",
     "character": "William Wallace",
-    "quote": "Houston, we have a problem."
+    "actor": "Mel Gibson",
+    "category": "Historical/Drama",
+    "year": 1995,
+    "context": "William Wallace's rallying cry for Scottish independence.",
+    "language": "English"
+  },
+  {
+    "quote": "I am the one who knocks.",
+    "movie": "Breaking Bad (TV Series)",
+    "character": "Walter White",
+    "actor": "Bryan Cranston",
+    "category": "Crime/Drama",
+    "year": 2008,
+    "context": "Walter White's transformation into a drug lord.",
+    "language": "English"
+  },
+  {
+    "quote": "Winter is coming.",
+    "movie": "Game of Thrones (TV Series)",
+    "character": "Eddard Stark",
+    "actor": "Sean Bean",
+    "category": "Fantasy/Drama",
+    "year": 2011,
+    "context": "The looming threat of the long winter in Westeros.",
+    "language": "English"
+  },
+  {
+    "quote": "I am not a number; I am a free man!",
+    "movie": "The Prisoner (TV Series)",
+    "character": "Number Six",
+    "actor": "Patrick McGoohan",
+    "category": "Science Fiction/Drama",
+    "year": 1967,
+    "context": "Number Six's defiance in a mysterious and surreal village.",
+    "language": "English"
+  },
+  {
+    "quote": "In my culture, death is not the end.",
+    "movie": "Star Trek: The Next Generation (TV Series)",
+    "character": "Worf",
+    "actor": "Michael Dorn",
+    "category": "Science Fiction/Adventure",
+    "year": 1987,
+    "context": "Worf's Klingon beliefs about the afterlife.",
+    "language": "English"
+  },
+  {
+    "quote": "That's what she said.",
+    "movie": "The Office (U.S.) (TV Series)",
+    "character": "Michael Scott",
+    "actor": "Steve Carell",
+    "category": "Comedy",
+    "year": 2005,
+    "context": "Michael Scott's signature catchphrase in awkward situations.",
+    "language": "English"
   }
 ]

@@ -6,8 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Category is the predicate function for category builders.
+type Category func(*sql.Selector)
+
 // Character is the predicate function for character builders.
 type Character func(*sql.Selector)
+
+// Language is the predicate function for language builders.
+type Language func(*sql.Selector)
 
 // Movie is the predicate function for movie builders.
 type Movie func(*sql.Selector)

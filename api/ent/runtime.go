@@ -3,30 +3,118 @@
 package ent
 
 import (
+	"api/ent/category"
 	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"api/ent/schema"
+	"time"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	categoryMixin := schema.Category{}.Mixin()
+	categoryMixinFields0 := categoryMixin[0].Fields()
+	_ = categoryMixinFields0
+	categoryFields := schema.Category{}.Fields()
+	_ = categoryFields
+	// categoryDescCreatedAt is the schema descriptor for created_at field.
+	categoryDescCreatedAt := categoryMixinFields0[0].Descriptor()
+	// category.DefaultCreatedAt holds the default value on creation for the created_at field.
+	category.DefaultCreatedAt = categoryDescCreatedAt.Default.(func() time.Time)
+	// categoryDescUpdatedAt is the schema descriptor for updated_at field.
+	categoryDescUpdatedAt := categoryMixinFields0[1].Descriptor()
+	// category.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	category.DefaultUpdatedAt = categoryDescUpdatedAt.Default.(func() time.Time)
+	// category.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	category.UpdateDefaultUpdatedAt = categoryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// categoryDescName is the schema descriptor for name field.
+	categoryDescName := categoryFields[0].Descriptor()
+	// category.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	category.NameValidator = categoryDescName.Validators[0].(func(string) error)
+	characterMixin := schema.Character{}.Mixin()
+	characterMixinFields0 := characterMixin[0].Fields()
+	_ = characterMixinFields0
 	characterFields := schema.Character{}.Fields()
 	_ = characterFields
+	// characterDescCreatedAt is the schema descriptor for created_at field.
+	characterDescCreatedAt := characterMixinFields0[0].Descriptor()
+	// character.DefaultCreatedAt holds the default value on creation for the created_at field.
+	character.DefaultCreatedAt = characterDescCreatedAt.Default.(func() time.Time)
+	// characterDescUpdatedAt is the schema descriptor for updated_at field.
+	characterDescUpdatedAt := characterMixinFields0[1].Descriptor()
+	// character.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	character.DefaultUpdatedAt = characterDescUpdatedAt.Default.(func() time.Time)
+	// character.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	character.UpdateDefaultUpdatedAt = characterDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// characterDescName is the schema descriptor for name field.
 	characterDescName := characterFields[0].Descriptor()
 	// character.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	character.NameValidator = characterDescName.Validators[0].(func(string) error)
+	// characterDescActor is the schema descriptor for actor field.
+	characterDescActor := characterFields[1].Descriptor()
+	// character.ActorValidator is a validator for the "actor" field. It is called by the builders before save.
+	character.ActorValidator = characterDescActor.Validators[0].(func(string) error)
+	languageMixin := schema.Language{}.Mixin()
+	languageMixinFields0 := languageMixin[0].Fields()
+	_ = languageMixinFields0
+	languageFields := schema.Language{}.Fields()
+	_ = languageFields
+	// languageDescCreatedAt is the schema descriptor for created_at field.
+	languageDescCreatedAt := languageMixinFields0[0].Descriptor()
+	// language.DefaultCreatedAt holds the default value on creation for the created_at field.
+	language.DefaultCreatedAt = languageDescCreatedAt.Default.(func() time.Time)
+	// languageDescUpdatedAt is the schema descriptor for updated_at field.
+	languageDescUpdatedAt := languageMixinFields0[1].Descriptor()
+	// language.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	language.DefaultUpdatedAt = languageDescUpdatedAt.Default.(func() time.Time)
+	// language.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	language.UpdateDefaultUpdatedAt = languageDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// languageDescName is the schema descriptor for name field.
+	languageDescName := languageFields[0].Descriptor()
+	// language.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	language.NameValidator = languageDescName.Validators[0].(func(string) error)
+	movieMixin := schema.Movie{}.Mixin()
+	movieMixinFields0 := movieMixin[0].Fields()
+	_ = movieMixinFields0
 	movieFields := schema.Movie{}.Fields()
 	_ = movieFields
+	// movieDescCreatedAt is the schema descriptor for created_at field.
+	movieDescCreatedAt := movieMixinFields0[0].Descriptor()
+	// movie.DefaultCreatedAt holds the default value on creation for the created_at field.
+	movie.DefaultCreatedAt = movieDescCreatedAt.Default.(func() time.Time)
+	// movieDescUpdatedAt is the schema descriptor for updated_at field.
+	movieDescUpdatedAt := movieMixinFields0[1].Descriptor()
+	// movie.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	movie.DefaultUpdatedAt = movieDescUpdatedAt.Default.(func() time.Time)
+	// movie.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	movie.UpdateDefaultUpdatedAt = movieDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// movieDescTitle is the schema descriptor for title field.
 	movieDescTitle := movieFields[0].Descriptor()
 	// movie.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	movie.TitleValidator = movieDescTitle.Validators[0].(func(string) error)
+	// movieDescYear is the schema descriptor for year field.
+	movieDescYear := movieFields[1].Descriptor()
+	// movie.YearValidator is a validator for the "year" field. It is called by the builders before save.
+	movie.YearValidator = movieDescYear.Validators[0].(func(int) error)
+	moviequoteMixin := schema.MovieQuote{}.Mixin()
+	moviequoteMixinFields0 := moviequoteMixin[0].Fields()
+	_ = moviequoteMixinFields0
 	moviequoteFields := schema.MovieQuote{}.Fields()
 	_ = moviequoteFields
+	// moviequoteDescCreatedAt is the schema descriptor for created_at field.
+	moviequoteDescCreatedAt := moviequoteMixinFields0[0].Descriptor()
+	// moviequote.DefaultCreatedAt holds the default value on creation for the created_at field.
+	moviequote.DefaultCreatedAt = moviequoteDescCreatedAt.Default.(func() time.Time)
+	// moviequoteDescUpdatedAt is the schema descriptor for updated_at field.
+	moviequoteDescUpdatedAt := moviequoteMixinFields0[1].Descriptor()
+	// moviequote.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	moviequote.DefaultUpdatedAt = moviequoteDescUpdatedAt.Default.(func() time.Time)
+	// moviequote.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	moviequote.UpdateDefaultUpdatedAt = moviequoteDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// moviequoteDescQuote is the schema descriptor for quote field.
 	moviequoteDescQuote := moviequoteFields[0].Descriptor()
 	// moviequote.QuoteValidator is a validator for the "quote" field. It is called by the builders before save.

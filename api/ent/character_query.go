@@ -4,10 +4,9 @@ package ent
 
 import (
 	"api/ent/character"
-	"api/ent/moviequote"
+	"api/ent/movie"
 	"api/ent/predicate"
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -24,7 +23,8 @@ type CharacterQuery struct {
 	order      []character.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Character
-	withQuotes *MovieQuoteQuery
+	withMovie  *MovieQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,9 +61,9 @@ func (cq *CharacterQuery) Order(o ...character.OrderOption) *CharacterQuery {
 	return cq
 }
 
-// QueryQuotes chains the current query on the "quotes" edge.
-func (cq *CharacterQuery) QueryQuotes() *MovieQuoteQuery {
-	query := (&MovieQuoteClient{config: cq.config}).Query()
+// QueryMovie chains the current query on the "movie" edge.
+func (cq *CharacterQuery) QueryMovie() *MovieQuery {
+	query := (&MovieClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (cq *CharacterQuery) QueryQuotes() *MovieQuoteQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(character.Table, character.FieldID, selector),
-			sqlgraph.To(moviequote.Table, moviequote.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, character.QuotesTable, character.QuotesColumn),
+			sqlgraph.To(movie.Table, movie.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, character.MovieTable, character.MovieColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,21 +275,21 @@ func (cq *CharacterQuery) Clone() *CharacterQuery {
 		order:      append([]character.OrderOption{}, cq.order...),
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Character{}, cq.predicates...),
-		withQuotes: cq.withQuotes.Clone(),
+		withMovie:  cq.withMovie.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
 	}
 }
 
-// WithQuotes tells the query-builder to eager-load the nodes that are connected to
-// the "quotes" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CharacterQuery) WithQuotes(opts ...func(*MovieQuoteQuery)) *CharacterQuery {
-	query := (&MovieQuoteClient{config: cq.config}).Query()
+// WithMovie tells the query-builder to eager-load the nodes that are connected to
+// the "movie" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CharacterQuery) WithMovie(opts ...func(*MovieQuery)) *CharacterQuery {
+	query := (&MovieClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withQuotes = query
+	cq.withMovie = query
 	return cq
 }
 
@@ -299,12 +299,12 @@ func (cq *CharacterQuery) WithQuotes(opts ...func(*MovieQuoteQuery)) *CharacterQ
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Character.Query().
-//		GroupBy(character.FieldName).
+//		GroupBy(character.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CharacterQuery) GroupBy(field string, fields ...string) *CharacterGroupBy {
@@ -322,11 +322,11 @@ func (cq *CharacterQuery) GroupBy(field string, fields ...string) *CharacterGrou
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Character.Query().
-//		Select(character.FieldName).
+//		Select(character.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (cq *CharacterQuery) Select(fields ...string) *CharacterSelect {
 	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
@@ -370,11 +370,18 @@ func (cq *CharacterQuery) prepareQuery(ctx context.Context) error {
 func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Character, error) {
 	var (
 		nodes       = []*Character{}
+		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
-			cq.withQuotes != nil,
+			cq.withMovie != nil,
 		}
 	)
+	if cq.withMovie != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, character.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Character).scanValues(nil, columns)
 	}
@@ -393,44 +400,44 @@ func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ch
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := cq.withQuotes; query != nil {
-		if err := cq.loadQuotes(ctx, query, nodes,
-			func(n *Character) { n.Edges.Quotes = []*MovieQuote{} },
-			func(n *Character, e *MovieQuote) { n.Edges.Quotes = append(n.Edges.Quotes, e) }); err != nil {
+	if query := cq.withMovie; query != nil {
+		if err := cq.loadMovie(ctx, query, nodes, nil,
+			func(n *Character, e *Movie) { n.Edges.Movie = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (cq *CharacterQuery) loadQuotes(ctx context.Context, query *MovieQuoteQuery, nodes []*Character, init func(*Character), assign func(*Character, *MovieQuote)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Character)
+func (cq *CharacterQuery) loadMovie(ctx context.Context, query *MovieQuery, nodes []*Character, init func(*Character), assign func(*Character, *Movie)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Character)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		if nodes[i].movie_characters == nil {
+			continue
 		}
+		fk := *nodes[i].movie_characters
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.MovieQuote(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(character.QuotesColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(movie.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.character_quotes
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "character_quotes" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "character_quotes" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "movie_characters" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }

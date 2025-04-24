@@ -3,7 +3,9 @@
 package ent
 
 import (
+	"api/ent/category"
 	"api/ent/character"
+	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
 	"context"
@@ -75,7 +77,9 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			category.Table:   category.ValidColumn,
 			character.Table:  character.ValidColumn,
+			language.Table:   language.ValidColumn,
 			movie.Table:      movie.ValidColumn,
 			moviequote.Table: moviequote.ValidColumn,
 		})
