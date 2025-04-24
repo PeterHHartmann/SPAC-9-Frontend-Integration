@@ -49,6 +49,15 @@ tasks:
     cmds:
       - docker buildx bake --push
 
+  proto:gen:
+    cmds:
+      - protoc --proto_path="{{.PROTO_PATH}}" --go_out="{{.GO_OUT}}" --go-grpc_out="{{.GO_GRPC_OUT}}" "proto/quotes.proto"
+    vars:
+      PROTO_PATH: "proto"
+      GO_OUT: "api"
+      GO_GRPC_OUT: "api"
+    desc: Generate protobuf go code
+
 includes:
   api: 
     taskfile: api/Taskfile.yml

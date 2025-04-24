@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	"api/db/ent"
+	"api/ent"
 	quotespb "api/proto/quotespb"
 
 	"entgo.io/ent/dialect/sql"
@@ -26,7 +26,7 @@ func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*qu
 	// Use the SQL query to order by random in PostgreSQL
 	q, err := s.client.MovieQuote.Query().
 		WithMovie().
-		WithCharacter().
+		WithLanguage().
 		Limit(1).
 		Order(sql.OrderByRand()).           // Randomize the order
 		First(ctx)
@@ -34,18 +34,29 @@ func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*qu
 		return nil, err
 	}
 
+	category, err := s.client.Movie.QueryCategory(q.Edges.Movie).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
+	movie := &quotespb.Movie{
+		Name:		q.Edges.Movie.Title,
+		Category: 	category.Name,
+		Year:		int32(q.Edges.Movie.Year),
+	}
+
 	return &quotespb.Quote{
-		Quote:     q.Quote,
-		Movie:     q.Edges.Movie.Title,
-		Character: q.Edges.Character.Name,
-		Year:      int32(q.Edges.Movie.Year),
+		Quote:     	q.Quote,
+		Movie: 		movie,
+		Context: 	q.Context,
+		Language: 	q.Edges.Language.Name,
 	}, nil
 }
 
 func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.QuoteRequest) (*quotespb.QuoteList, error) {
 	query := s.client.MovieQuote.Query().
 		WithMovie().
-		WithCharacter()
+		WithLanguage()
 
 	quotes, err := query.All(ctx)
 	if err != nil {
@@ -54,11 +65,23 @@ func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.QuoteRequest)
 
 	result := &quotespb.QuoteList{}
 	for _, q := range quotes {
+
+		category, err := s.client.Movie.QueryCategory(q.Edges.Movie).First(ctx)
+		if err != nil {
+			return nil, err
+		}
+		
+		movie := &quotespb.Movie{
+			Name:		q.Edges.Movie.Title,
+			Category: 	category.Name,
+			Year:		int32(q.Edges.Movie.Year),
+		}
+
 		result.Quotes = append(result.Quotes, &quotespb.Quote{
 			Quote:     q.Quote,
-			Movie:     q.Edges.Movie.Title,
-			Character: q.Edges.Character.Name,
-			Year:      int32(q.Edges.Movie.Year),
+			Movie:     movie,
+			Context: 	q.Context,
+			Language:  q.Edges.Language.Name,
 		})
 	}
 

@@ -23,15 +23,6 @@ tasks:
       - go mod tidy
     desc: Tidy up api project
 
-  proto:gen:
-    cmds:
-      - protoc \
-        --proto_path=api/proto \
-        --go_out=. \
-        --go-grpc_out=. \
-        api/proto/quotes.proto
-    desc: Generate protobuf go code
-
   ent:new:
     cmds:
       - go run -mod=mod entgo.io/ent/cmd/ent new {{.name}}
@@ -47,10 +38,6 @@ tasks:
     desc: Generate database models based on ent schema
     generates:
       - api/db/ent/*.go
-
-  ent:migrate:new:
-    cmds:
-      - go run -mod=mod ent/migrate/main.go {{.CLI_ARGS}}
 
   ent:migrate:create:
     dotenv: ["../.env.example"]
@@ -71,15 +58,6 @@ tasks:
     vars:
       DIR: "file://ent/migrate/migrations"
       URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?search_path=public&sslmode=disable
-
-  ent:migrate:apply:baseline:
-    dotenv: ["../.env.example"]
-    cmds:
-      - atlas migrate apply --dir "{{.DIR}}" --url "postgres://testuser:testpass@localhost:5444/testdb?search_path=public&sslmode=disable" --baseline "{{20250424203551}}"
-    vars:
-      DIR: "file://ent/migrate/migrations"
-      URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?search_path=public&sslmode=disable
-      BASELINE: "20250424203130"
   
   ent:migrate:status:
     dotenv: ["../.env.example"]

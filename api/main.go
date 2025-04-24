@@ -5,6 +5,7 @@ package main
 import (
 	"api/db"
 	"api/ent"
+	"api/grpc"
 	"context"
 	"log"
 
@@ -39,5 +40,5 @@ func main() {
 		log.Fatalf("❌ Failed to seed data: %v", err)
 	}
 
-	// grpc.StartGRPC(client)
+	grpc.StartGRPC(client)
 }

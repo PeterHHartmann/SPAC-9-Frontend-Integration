@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+package quotes;
+option go_package = "proto/quotespb";
+
+message QuoteRequest {
+	string movie = 1;
+	int32 decade = 2;
+}
+
+message Movie {
+	string name = 1;
+	string category = 2;
+	int32 year = 3;
+}
+
+message Quote {
+	string quote = 1;
+	Movie movie = 2;
+	string context = 4;
+	string language = 7;
+}
+
+message QuoteList {
+	repeated Quote quotes = 1;
+}
+
+service QuoteService {
+	rpc GetRandomQuote (google.protobuf.Empty) returns (Quote);
+	rpc GetQuotes (QuoteRequest) returns (QuoteList);
+}
