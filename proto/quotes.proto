@@ -9,17 +9,23 @@ message QuoteRequest {
 	int32 decade = 2;
 }
 
+message Character {
+	string name = 1;
+	string actor = 2;
+}
+
 message Movie {
 	string name = 1;
-	string category = 2;
-	int32 year = 3;
+	Character character = 2;
+	string category = 3;
+	int32 year = 4;
 }
 
 message Quote {
 	string quote = 1;
 	Movie movie = 2;
-	string context = 4;
-	string language = 7;
+	string context = 3;
+	string language = 4;
 }
 
 message QuoteList {

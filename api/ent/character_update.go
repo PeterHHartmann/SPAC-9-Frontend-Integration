@@ -63,23 +63,19 @@ func (cu *CharacterUpdate) SetNillableActor(s *string) *CharacterUpdate {
 	return cu
 }
 
-// SetMovieID sets the "movie" edge to the Movie entity by ID.
-func (cu *CharacterUpdate) SetMovieID(id int) *CharacterUpdate {
-	cu.mutation.SetMovieID(id)
+// AddMovieIDs adds the "movie" edge to the Movie entity by IDs.
+func (cu *CharacterUpdate) AddMovieIDs(ids ...int) *CharacterUpdate {
+	cu.mutation.AddMovieIDs(ids...)
 	return cu
 }
 
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (cu *CharacterUpdate) SetNillableMovieID(id *int) *CharacterUpdate {
-	if id != nil {
-		cu = cu.SetMovieID(*id)
+// AddMovie adds the "movie" edges to the Movie entity.
+func (cu *CharacterUpdate) AddMovie(m ...*Movie) *CharacterUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
 	}
-	return cu
-}
-
-// SetMovie sets the "movie" edge to the Movie entity.
-func (cu *CharacterUpdate) SetMovie(m *Movie) *CharacterUpdate {
-	return cu.SetMovieID(m.ID)
+	return cu.AddMovieIDs(ids...)
 }
 
 // Mutation returns the CharacterMutation object of the builder.
@@ -87,10 +83,25 @@ func (cu *CharacterUpdate) Mutation() *CharacterMutation {
 	return cu.mutation
 }
 
-// ClearMovie clears the "movie" edge to the Movie entity.
+// ClearMovie clears all "movie" edges to the Movie entity.
 func (cu *CharacterUpdate) ClearMovie() *CharacterUpdate {
 	cu.mutation.ClearMovie()
 	return cu
+}
+
+// RemoveMovieIDs removes the "movie" edge to Movie entities by IDs.
+func (cu *CharacterUpdate) RemoveMovieIDs(ids ...int) *CharacterUpdate {
+	cu.mutation.RemoveMovieIDs(ids...)
+	return cu
+}
+
+// RemoveMovie removes "movie" edges to Movie entities.
+func (cu *CharacterUpdate) RemoveMovie(m ...*Movie) *CharacterUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return cu.RemoveMovieIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -167,10 +178,10 @@ func (cu *CharacterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if cu.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   character.MovieTable,
-			Columns: []string{character.MovieColumn},
+			Columns: character.MoviePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
@@ -178,12 +189,28 @@ func (cu *CharacterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.MovieIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.RemovedMovieIDs(); len(nodes) > 0 && !cu.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   character.MovieTable,
-			Columns: []string{character.MovieColumn},
+			Columns: character.MoviePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.MovieIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   character.MovieTable,
+			Columns: character.MoviePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
@@ -248,23 +275,19 @@ func (cuo *CharacterUpdateOne) SetNillableActor(s *string) *CharacterUpdateOne {
 	return cuo
 }
 
-// SetMovieID sets the "movie" edge to the Movie entity by ID.
-func (cuo *CharacterUpdateOne) SetMovieID(id int) *CharacterUpdateOne {
-	cuo.mutation.SetMovieID(id)
+// AddMovieIDs adds the "movie" edge to the Movie entity by IDs.
+func (cuo *CharacterUpdateOne) AddMovieIDs(ids ...int) *CharacterUpdateOne {
+	cuo.mutation.AddMovieIDs(ids...)
 	return cuo
 }
 
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (cuo *CharacterUpdateOne) SetNillableMovieID(id *int) *CharacterUpdateOne {
-	if id != nil {
-		cuo = cuo.SetMovieID(*id)
+// AddMovie adds the "movie" edges to the Movie entity.
+func (cuo *CharacterUpdateOne) AddMovie(m ...*Movie) *CharacterUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
 	}
-	return cuo
-}
-
-// SetMovie sets the "movie" edge to the Movie entity.
-func (cuo *CharacterUpdateOne) SetMovie(m *Movie) *CharacterUpdateOne {
-	return cuo.SetMovieID(m.ID)
+	return cuo.AddMovieIDs(ids...)
 }
 
 // Mutation returns the CharacterMutation object of the builder.
@@ -272,10 +295,25 @@ func (cuo *CharacterUpdateOne) Mutation() *CharacterMutation {
 	return cuo.mutation
 }
 
-// ClearMovie clears the "movie" edge to the Movie entity.
+// ClearMovie clears all "movie" edges to the Movie entity.
 func (cuo *CharacterUpdateOne) ClearMovie() *CharacterUpdateOne {
 	cuo.mutation.ClearMovie()
 	return cuo
+}
+
+// RemoveMovieIDs removes the "movie" edge to Movie entities by IDs.
+func (cuo *CharacterUpdateOne) RemoveMovieIDs(ids ...int) *CharacterUpdateOne {
+	cuo.mutation.RemoveMovieIDs(ids...)
+	return cuo
+}
+
+// RemoveMovie removes "movie" edges to Movie entities.
+func (cuo *CharacterUpdateOne) RemoveMovie(m ...*Movie) *CharacterUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return cuo.RemoveMovieIDs(ids...)
 }
 
 // Where appends a list predicates to the CharacterUpdate builder.
@@ -382,10 +420,10 @@ func (cuo *CharacterUpdateOne) sqlSave(ctx context.Context) (_node *Character, e
 	}
 	if cuo.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   character.MovieTable,
-			Columns: []string{character.MovieColumn},
+			Columns: character.MoviePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
@@ -393,12 +431,28 @@ func (cuo *CharacterUpdateOne) sqlSave(ctx context.Context) (_node *Character, e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.MovieIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.RemovedMovieIDs(); len(nodes) > 0 && !cuo.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   character.MovieTable,
-			Columns: []string{character.MovieColumn},
+			Columns: character.MoviePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.MovieIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   character.MovieTable,
+			Columns: character.MoviePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),

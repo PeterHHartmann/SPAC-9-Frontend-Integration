@@ -15,7 +15,8 @@ type MovieQuote struct {
 func (MovieQuote) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("quote").
-			NotEmpty(),
+			NotEmpty().
+			Unique(),
 		field.String("context"),
 	}
 }
@@ -30,7 +31,7 @@ func (MovieQuote) Mixin() []ent.Mixin {
 // Edges of the MovieQuote i.e. relationships.
 func (MovieQuote) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("movie", Movie.Type).
+		edge.From("movies", Movie.Type).
 			Ref("quotes").
 			Unique(),
 		edge.From("language", Language.Type).

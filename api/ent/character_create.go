@@ -61,23 +61,19 @@ func (cc *CharacterCreate) SetActor(s string) *CharacterCreate {
 	return cc
 }
 
-// SetMovieID sets the "movie" edge to the Movie entity by ID.
-func (cc *CharacterCreate) SetMovieID(id int) *CharacterCreate {
-	cc.mutation.SetMovieID(id)
+// AddMovieIDs adds the "movie" edge to the Movie entity by IDs.
+func (cc *CharacterCreate) AddMovieIDs(ids ...int) *CharacterCreate {
+	cc.mutation.AddMovieIDs(ids...)
 	return cc
 }
 
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (cc *CharacterCreate) SetNillableMovieID(id *int) *CharacterCreate {
-	if id != nil {
-		cc = cc.SetMovieID(*id)
+// AddMovie adds the "movie" edges to the Movie entity.
+func (cc *CharacterCreate) AddMovie(m ...*Movie) *CharacterCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
 	}
-	return cc
-}
-
-// SetMovie sets the "movie" edge to the Movie entity.
-func (cc *CharacterCreate) SetMovie(m *Movie) *CharacterCreate {
-	return cc.SetMovieID(m.ID)
+	return cc.AddMovieIDs(ids...)
 }
 
 // Mutation returns the CharacterMutation object of the builder.
@@ -193,10 +189,10 @@ func (cc *CharacterCreate) createSpec() (*Character, *sqlgraph.CreateSpec) {
 	}
 	if nodes := cc.mutation.MovieIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   character.MovieTable,
-			Columns: []string{character.MovieColumn},
+			Columns: character.MoviePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
@@ -205,7 +201,6 @@ func (cc *CharacterCreate) createSpec() (*Character, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.movie_characters = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

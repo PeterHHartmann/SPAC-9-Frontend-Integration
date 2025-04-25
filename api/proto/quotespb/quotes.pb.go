@@ -74,18 +74,71 @@ func (x *QuoteRequest) GetDecade() int32 {
 	return 0
 }
 
+type Character struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Actor         string                 `protobuf:"bytes,2,opt,name=actor,proto3" json:"actor,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Character) Reset() {
+	*x = Character{}
+	mi := &file_quotes_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Character) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Character) ProtoMessage() {}
+
+func (x *Character) ProtoReflect() protoreflect.Message {
+	mi := &file_quotes_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Character.ProtoReflect.Descriptor instead.
+func (*Character) Descriptor() ([]byte, []int) {
+	return file_quotes_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Character) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Character) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
 type Movie struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Category      string                 `protobuf:"bytes,2,opt,name=category,proto3" json:"category,omitempty"`
-	Year          int32                  `protobuf:"varint,3,opt,name=year,proto3" json:"year,omitempty"`
+	Character     *Character             `protobuf:"bytes,2,opt,name=character,proto3" json:"character,omitempty"`
+	Category      string                 `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"`
+	Year          int32                  `protobuf:"varint,4,opt,name=year,proto3" json:"year,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Movie) Reset() {
 	*x = Movie{}
-	mi := &file_quotes_proto_msgTypes[1]
+	mi := &file_quotes_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -97,7 +150,7 @@ func (x *Movie) String() string {
 func (*Movie) ProtoMessage() {}
 
 func (x *Movie) ProtoReflect() protoreflect.Message {
-	mi := &file_quotes_proto_msgTypes[1]
+	mi := &file_quotes_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -110,7 +163,7 @@ func (x *Movie) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Movie.ProtoReflect.Descriptor instead.
 func (*Movie) Descriptor() ([]byte, []int) {
-	return file_quotes_proto_rawDescGZIP(), []int{1}
+	return file_quotes_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Movie) GetName() string {
@@ -118,6 +171,13 @@ func (x *Movie) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *Movie) GetCharacter() *Character {
+	if x != nil {
+		return x.Character
+	}
+	return nil
 }
 
 func (x *Movie) GetCategory() string {
@@ -138,15 +198,15 @@ type Quote struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Quote         string                 `protobuf:"bytes,1,opt,name=quote,proto3" json:"quote,omitempty"`
 	Movie         *Movie                 `protobuf:"bytes,2,opt,name=movie,proto3" json:"movie,omitempty"`
-	Context       string                 `protobuf:"bytes,4,opt,name=context,proto3" json:"context,omitempty"`
-	Language      string                 `protobuf:"bytes,7,opt,name=language,proto3" json:"language,omitempty"`
+	Context       string                 `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`
+	Language      string                 `protobuf:"bytes,4,opt,name=language,proto3" json:"language,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Quote) Reset() {
 	*x = Quote{}
-	mi := &file_quotes_proto_msgTypes[2]
+	mi := &file_quotes_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -158,7 +218,7 @@ func (x *Quote) String() string {
 func (*Quote) ProtoMessage() {}
 
 func (x *Quote) ProtoReflect() protoreflect.Message {
-	mi := &file_quotes_proto_msgTypes[2]
+	mi := &file_quotes_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -171,7 +231,7 @@ func (x *Quote) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Quote.ProtoReflect.Descriptor instead.
 func (*Quote) Descriptor() ([]byte, []int) {
-	return file_quotes_proto_rawDescGZIP(), []int{2}
+	return file_quotes_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Quote) GetQuote() string {
@@ -211,7 +271,7 @@ type QuoteList struct {
 
 func (x *QuoteList) Reset() {
 	*x = QuoteList{}
-	mi := &file_quotes_proto_msgTypes[3]
+	mi := &file_quotes_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -223,7 +283,7 @@ func (x *QuoteList) String() string {
 func (*QuoteList) ProtoMessage() {}
 
 func (x *QuoteList) ProtoReflect() protoreflect.Message {
-	mi := &file_quotes_proto_msgTypes[3]
+	mi := &file_quotes_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -236,7 +296,7 @@ func (x *QuoteList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuoteList.ProtoReflect.Descriptor instead.
 func (*QuoteList) Descriptor() ([]byte, []int) {
-	return file_quotes_proto_rawDescGZIP(), []int{3}
+	return file_quotes_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *QuoteList) GetQuotes() []*Quote {
@@ -253,16 +313,20 @@ const file_quotes_proto_rawDesc = "" +
 	"\fquotes.proto\x12\x06quotes\x1a\x1bgoogle/protobuf/empty.proto\"<\n" +
 	"\fQuoteRequest\x12\x14\n" +
 	"\x05movie\x18\x01 \x01(\tR\x05movie\x12\x16\n" +
-	"\x06decade\x18\x02 \x01(\x05R\x06decade\"K\n" +
+	"\x06decade\x18\x02 \x01(\x05R\x06decade\"5\n" +
+	"\tCharacter\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05actor\x18\x02 \x01(\tR\x05actor\"|\n" +
 	"\x05Movie\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
-	"\bcategory\x18\x02 \x01(\tR\bcategory\x12\x12\n" +
-	"\x04year\x18\x03 \x01(\x05R\x04year\"x\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12/\n" +
+	"\tcharacter\x18\x02 \x01(\v2\x11.quotes.CharacterR\tcharacter\x12\x1a\n" +
+	"\bcategory\x18\x03 \x01(\tR\bcategory\x12\x12\n" +
+	"\x04year\x18\x04 \x01(\x05R\x04year\"x\n" +
 	"\x05Quote\x12\x14\n" +
 	"\x05quote\x18\x01 \x01(\tR\x05quote\x12#\n" +
 	"\x05movie\x18\x02 \x01(\v2\r.quotes.MovieR\x05movie\x12\x18\n" +
-	"\acontext\x18\x04 \x01(\tR\acontext\x12\x1a\n" +
-	"\blanguage\x18\a \x01(\tR\blanguage\"2\n" +
+	"\acontext\x18\x03 \x01(\tR\acontext\x12\x1a\n" +
+	"\blanguage\x18\x04 \x01(\tR\blanguage\"2\n" +
 	"\tQuoteList\x12%\n" +
 	"\x06quotes\x18\x01 \x03(\v2\r.quotes.QuoteR\x06quotes2}\n" +
 	"\fQuoteService\x127\n" +
@@ -281,26 +345,28 @@ func file_quotes_proto_rawDescGZIP() []byte {
 	return file_quotes_proto_rawDescData
 }
 
-var file_quotes_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_quotes_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_quotes_proto_goTypes = []any{
 	(*QuoteRequest)(nil), // 0: quotes.QuoteRequest
-	(*Movie)(nil),        // 1: quotes.Movie
-	(*Quote)(nil),        // 2: quotes.Quote
-	(*QuoteList)(nil),    // 3: quotes.QuoteList
-	(*empty.Empty)(nil),  // 4: google.protobuf.Empty
+	(*Character)(nil),    // 1: quotes.Character
+	(*Movie)(nil),        // 2: quotes.Movie
+	(*Quote)(nil),        // 3: quotes.Quote
+	(*QuoteList)(nil),    // 4: quotes.QuoteList
+	(*empty.Empty)(nil),  // 5: google.protobuf.Empty
 }
 var file_quotes_proto_depIdxs = []int32{
-	1, // 0: quotes.Quote.movie:type_name -> quotes.Movie
-	2, // 1: quotes.QuoteList.quotes:type_name -> quotes.Quote
-	4, // 2: quotes.QuoteService.GetRandomQuote:input_type -> google.protobuf.Empty
-	0, // 3: quotes.QuoteService.GetQuotes:input_type -> quotes.QuoteRequest
-	2, // 4: quotes.QuoteService.GetRandomQuote:output_type -> quotes.Quote
-	3, // 5: quotes.QuoteService.GetQuotes:output_type -> quotes.QuoteList
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // 0: quotes.Movie.character:type_name -> quotes.Character
+	2, // 1: quotes.Quote.movie:type_name -> quotes.Movie
+	3, // 2: quotes.QuoteList.quotes:type_name -> quotes.Quote
+	5, // 3: quotes.QuoteService.GetRandomQuote:input_type -> google.protobuf.Empty
+	0, // 4: quotes.QuoteService.GetQuotes:input_type -> quotes.QuoteRequest
+	3, // 5: quotes.QuoteService.GetRandomQuote:output_type -> quotes.Quote
+	4, // 6: quotes.QuoteService.GetQuotes:output_type -> quotes.QuoteList
+	5, // [5:7] is the sub-list for method output_type
+	3, // [3:5] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_quotes_proto_init() }
@@ -314,7 +380,7 @@ func file_quotes_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_quotes_proto_rawDesc), len(file_quotes_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -4,7 +4,6 @@ package ent
 
 import (
 	"api/ent/character"
-	"api/ent/movie"
 	"fmt"
 	"strings"
 	"time"
@@ -28,27 +27,24 @@ type Character struct {
 	Actor string `json:"actor,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CharacterQuery when eager-loading is set.
-	Edges            CharacterEdges `json:"edges"`
-	movie_characters *int
-	selectValues     sql.SelectValues
+	Edges        CharacterEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // CharacterEdges holds the relations/edges for other nodes in the graph.
 type CharacterEdges struct {
 	// Movie holds the value of the movie edge.
-	Movie *Movie `json:"movie,omitempty"`
+	Movie []*Movie `json:"movie,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // MovieOrErr returns the Movie value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CharacterEdges) MovieOrErr() (*Movie, error) {
-	if e.Movie != nil {
+// was not loaded in eager-loading.
+func (e CharacterEdges) MovieOrErr() ([]*Movie, error) {
+	if e.loadedTypes[0] {
 		return e.Movie, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: movie.Label}
 	}
 	return nil, &NotLoadedError{edge: "movie"}
 }
@@ -64,8 +60,6 @@ func (*Character) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case character.FieldCreatedAt, character.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case character.ForeignKeys[0]: // movie_characters
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -110,13 +104,6 @@ func (c *Character) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field actor", values[i])
 			} else if value.Valid {
 				c.Actor = value.String
-			}
-		case character.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field movie_characters", value)
-			} else if value.Valid {
-				c.movie_characters = new(int)
-				*c.movie_characters = int(value.Int64)
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])

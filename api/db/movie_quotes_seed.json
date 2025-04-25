@@ -10,16 +10,6 @@
     "language": "English"
   },
   {
-    "quote": "Life’s simple. You make choices and you don’t look back",
-    "movie": "The Fast and The Furious: Tokyo Drift",
-    "character": "Han Lue",
-    "actor": "Sung Kang",
-    "category": "Action",
-    "year": 2006,
-    "context": "",
-    "language": "English"
-  },
-  {
     "quote": "Hasta la vista, baby.",
     "movie": "Terminator 2: Judgment Day",
     "character": "The Terminator",
@@ -330,76 +320,6 @@
     "language": "English"
   },
   {
-    "quote": "I'm not a smart man, but I know what love is.",
-    "movie": "Forrest Gump",
-    "character": "Forrest Gump",
-    "actor": "Tom Hanks",
-    "category": "Drama/Comedy",
-    "year": 1994,
-    "context": "Forrest's reflection on love and simplicity.",
-    "language": "English"
-  },
-  {
-    "quote": "It's not who I am underneath, but what I do that defines me.",
-    "movie": "Batman Begins",
-    "character": "Bruce Wayne/Batman",
-    "actor": "Christian Bale",
-    "category": "Superhero/Action",
-    "year": 2005,
-    "context": "Batman's philosophy on identity and actions.",
-    "language": "English"
-  },
-  {
-    "quote": "I am vengeance. I am the night. I am Batman.",
-    "movie": "Batman: The Animated Series (TV Series)",
-    "character": "Voice of Batman",
-    "actor": "Kevin Conroy",
-    "category": "Animation/Superhero",
-    "year": 1992,
-    "context": "Batman's introduction in the animated series.",
-    "language": "English"
-  },
-  {
-    "quote": "Wax on, wax off.",
-    "movie": "The Karate Kid",
-    "character": "Mr. Miyagi",
-    "actor": "Pat Morita",
-    "category": "Drama/Action",
-    "year": 1984,
-    "context": "Mr. Miyagi's teaching method.",
-    "language": "English"
-  },
-  {
-    "quote": "Nobody puts Baby in a corner.",
-    "movie": "Dirty Dancing",
-    "character": "Johnny Castle",
-    "actor": "Patrick Swayze",
-    "category": "Romance/Drama",
-    "year": 1987,
-    "context": "Johnny's declaration of love for Baby.",
-    "language": "English"
-  },
-  {
-    "quote": "To the infinity and beyond!",
-    "movie": "Toy Story 3",
-    "character": "Buzz Lightyear",
-    "actor": "Tim Allen",
-    "category": "Animation/Family",
-    "year": 2010,
-    "context": "Buzz Lightyear's enthusiastic variation of his catchphrase.",
-    "language": "English"
-  },
-  {
-    "quote": "I'll get you, my pretty, and your little dog too!",
-    "movie": "The Wizard of Oz",
-    "character": "The Wicked Witch of the West",
-    "actor": "Margaret Hamilton",
-    "category": "Fantasy/Adventure",
-    "year": 1939,
-    "context": "The Wicked Witch's threat to Dorothy.",
-    "language": "English"
-  },
-  {
     "quote": "May the Force be with you.",
     "movie": "Star Wars",
     "character": "Various Characters",
@@ -610,16 +530,6 @@
     "language": "English"
   },
   {
-    "quote": "I am vengeance. I am the night. I am Batman.",
-    "movie": "Batman: The Animated Series (TV Series)",
-    "character": "Voice of Batman",
-    "actor": "Kevin Conroy",
-    "category": "Animation/Superhero (TV Series)",
-    "year": 1992,
-    "context": "Batman's introduction in the animated series.",
-    "language": "English"
-  },
-  {
     "quote": "I'll be there for you.",
     "movie": "Friends (TV Series)",
     "character": "Theme Song",
@@ -650,76 +560,6 @@
     "language": "English"
   },
   {
-    "quote": "Winter is coming.",
-    "movie": "Game of Thrones (TV Series)",
-    "character": "Eddard Stark",
-    "actor": "Sean Bean",
-    "category": "Fantasy/Drama (TV Series)",
-    "year": 2011,
-    "context": "The ominous warning of impending danger in the series.",
-    "language": "English"
-  },
-  {
-    "quote": "I am not a hero. I am a high-functioning sociopath.",
-    "movie": "Sherlock (TV Series)",
-    "character": "Sherlock Holmes",
-    "actor": "Benedict Cumberbatch",
-    "category": "Mystery/Crime (TV Series)",
-    "year": 2010,
-    "context": "Sherlock Holmes' self-description.",
-    "language": "English"
-  },
-  {
-    "quote": "I have nothing to prove to you.",
-    "movie": "Captain Marvel",
-    "character": "Carol Danvers/Captain Marvel",
-    "actor": "Brie Larson",
-    "category": "Superhero/Action",
-    "year": 2019,
-    "context": "Captain Marvel's assertion of her abilities.",
-    "language": "English"
-  },
-  {
-    "quote": "Why so serious?",
-    "movie": "The Dark Knight",
-    "character": "The Joker",
-    "actor": "Heath Ledger",
-    "category": "Superhero/Crime",
-    "year": 2008,
-    "context": "The Joker's iconic question to his victims.",
-    "language": "English"
-  },
-  {
-    "quote": "I am vengeance. I am the night. I am Batman.",
-    "movie": "Batman: The Animated Series (TV Series)",
-    "character": "Voice of Batman",
-    "actor": "Kevin Conroy",
-    "category": "Animation/Superhero (TV Series)",
-    "year": 1992,
-    "context": "Batman's introduction in the animated series.",
-    "language": "English"
-  },
-  {
-    "quote": "I'll be there for you.",
-    "movie": "Friends (TV Series)",
-    "character": "Theme Song",
-    "actor": "The Rembrandts",
-    "category": "Comedy/Romance (TV Series)",
-    "year": 1994,
-    "context": "The iconic theme song of the series.",
-    "language": "English"
-  },
-  {
-    "quote": "I am Groot.",
-    "movie": "Guardians of the Galaxy",
-    "character": "Voice of Groot",
-    "actor": "Vin Diesel",
-    "category": "Superhero/Science Fiction",
-    "year": 2014,
-    "context": "Groot's catchphrase, which means different things based on intonation.",
-    "language": "Groot's language (limited vocabulary)"
-  },
-  {
     "quote": "To be or not to be, that is the question.",
     "movie": "Hamlet",
     "character": "Hamlet",
@@ -730,36 +570,6 @@
     "language": "English (in the original play)"
   },
   {
-    "quote": "I love the smell of napalm in the morning.",
-    "movie": "Apocalypse Now",
-    "character": "Lt. Col. Kilgore",
-    "actor": "Robert Duvall",
-    "category": "War/Drama",
-    "year": 1979,
-    "context": "Lt. Col. Kilgore's memorable line during a military operation.",
-    "language": "English"
-  },
-  {
-    "quote": "What we've got here is a failure to communicate.",
-    "movie": "Cool Hand Luke",
-    "character": "Captain",
-    "actor": "Strother Martin",
-    "category": "Drama/Crime",
-    "year": 1967,
-    "context": "The Captain's explanation of a recurring issue.",
-    "language": "English"
-  },
-  {
-    "quote": "They may take our lives, but they'll never take our freedom!",
-    "movie": "Braveheart",
-    "character": "William Wallace",
-    "actor": "Mel Gibson",
-    "category": "Historical/Drama",
-    "year": 1995,
-    "context": "William Wallace's rallying cry for Scottish independence.",
-    "language": "English"
-  },
-  {
     "quote": "I am the one who knocks.",
     "movie": "Breaking Bad (TV Series)",
     "character": "Walter White",
@@ -767,16 +577,6 @@
     "category": "Crime/Drama",
     "year": 2008,
     "context": "Walter White's transformation into a drug lord.",
-    "language": "English"
-  },
-  {
-    "quote": "Winter is coming.",
-    "movie": "Game of Thrones (TV Series)",
-    "character": "Eddard Stark",
-    "actor": "Sean Bean",
-    "category": "Fantasy/Drama",
-    "year": 2011,
-    "context": "The looming threat of the long winter in Westeros.",
     "language": "English"
   },
   {

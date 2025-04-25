@@ -35,13 +35,11 @@ const (
 	// CategoryInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
 	CategoryInverseTable = "categories"
-	// CharactersTable is the table that holds the characters relation/edge.
-	CharactersTable = "characters"
+	// CharactersTable is the table that holds the characters relation/edge. The primary key declared below.
+	CharactersTable = "movie_characters"
 	// CharactersInverseTable is the table name for the Character entity.
 	// It exists in this package in order to avoid circular dependency with the "character" package.
 	CharactersInverseTable = "characters"
-	// CharactersColumn is the table column denoting the characters relation/edge.
-	CharactersColumn = "movie_characters"
 	// QuotesTable is the table that holds the quotes relation/edge.
 	QuotesTable = "movie_quotes"
 	// QuotesInverseTable is the table name for the MovieQuote entity.
@@ -64,6 +62,9 @@ var (
 	// CategoryPrimaryKey and CategoryColumn2 are the table columns denoting the
 	// primary key for the category relation (M2M).
 	CategoryPrimaryKey = []string{"category_id", "movie_id"}
+	// CharactersPrimaryKey and CharactersColumn2 are the table columns denoting the
+	// primary key for the characters relation (M2M).
+	CharactersPrimaryKey = []string{"movie_id", "character_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -169,7 +170,7 @@ func newCharactersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CharactersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, CharactersTable, CharactersColumn),
+		sqlgraph.Edge(sqlgraph.M2M, false, CharactersTable, CharactersPrimaryKey...),
 	)
 }
 func newQuotesStep() *sqlgraph.Step {

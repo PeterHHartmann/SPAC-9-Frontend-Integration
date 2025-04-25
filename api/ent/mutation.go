@@ -573,7 +573,8 @@ type CharacterMutation struct {
 	name          *string
 	actor         *string
 	clearedFields map[string]struct{}
-	movie         *int
+	movie         map[int]struct{}
+	removedmovie  map[int]struct{}
 	clearedmovie  bool
 	done          bool
 	oldValue      func(context.Context) (*Character, error)
@@ -822,9 +823,14 @@ func (m *CharacterMutation) ResetActor() {
 	m.actor = nil
 }
 
-// SetMovieID sets the "movie" edge to the Movie entity by id.
-func (m *CharacterMutation) SetMovieID(id int) {
-	m.movie = &id
+// AddMovieIDs adds the "movie" edge to the Movie entity by ids.
+func (m *CharacterMutation) AddMovieIDs(ids ...int) {
+	if m.movie == nil {
+		m.movie = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.movie[ids[i]] = struct{}{}
+	}
 }
 
 // ClearMovie clears the "movie" edge to the Movie entity.
@@ -837,20 +843,29 @@ func (m *CharacterMutation) MovieCleared() bool {
 	return m.clearedmovie
 }
 
-// MovieID returns the "movie" edge ID in the mutation.
-func (m *CharacterMutation) MovieID() (id int, exists bool) {
-	if m.movie != nil {
-		return *m.movie, true
+// RemoveMovieIDs removes the "movie" edge to the Movie entity by IDs.
+func (m *CharacterMutation) RemoveMovieIDs(ids ...int) {
+	if m.removedmovie == nil {
+		m.removedmovie = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.movie, ids[i])
+		m.removedmovie[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMovie returns the removed IDs of the "movie" edge to the Movie entity.
+func (m *CharacterMutation) RemovedMovieIDs() (ids []int) {
+	for id := range m.removedmovie {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // MovieIDs returns the "movie" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// MovieID instead. It exists only for internal usage by the builders.
 func (m *CharacterMutation) MovieIDs() (ids []int) {
-	if id := m.movie; id != nil {
-		ids = append(ids, *id)
+	for id := range m.movie {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -859,6 +874,7 @@ func (m *CharacterMutation) MovieIDs() (ids []int) {
 func (m *CharacterMutation) ResetMovie() {
 	m.movie = nil
 	m.clearedmovie = false
+	m.removedmovie = nil
 }
 
 // Where appends a list predicates to the CharacterMutation builder.
@@ -1057,9 +1073,11 @@ func (m *CharacterMutation) AddedEdges() []string {
 func (m *CharacterMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case character.EdgeMovie:
-		if id := m.movie; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.movie))
+		for id := range m.movie {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -1067,12 +1085,23 @@ func (m *CharacterMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CharacterMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedmovie != nil {
+		edges = append(edges, character.EdgeMovie)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CharacterMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case character.EdgeMovie:
+		ids := make([]ent.Value, 0, len(m.removedmovie))
+		for id := range m.removedmovie {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
@@ -1099,9 +1128,6 @@ func (m *CharacterMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *CharacterMutation) ClearEdge(name string) error {
 	switch name {
-	case character.EdgeMovie:
-		m.ClearMovie()
-		return nil
 	}
 	return fmt.Errorf("unknown Character unique edge %s", name)
 }

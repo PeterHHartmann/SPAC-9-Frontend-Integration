@@ -28,21 +28,12 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "actor", Type: field.TypeString},
-		{Name: "movie_characters", Type: field.TypeInt, Nullable: true},
 	}
 	// CharactersTable holds the schema information for the "characters" table.
 	CharactersTable = &schema.Table{
 		Name:       "characters",
 		Columns:    CharactersColumns,
 		PrimaryKey: []*schema.Column{CharactersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "characters_movies_characters",
-				Columns:    []*schema.Column{CharactersColumns[5]},
-				RefColumns: []*schema.Column{MoviesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "character_name_actor",
@@ -133,6 +124,31 @@ var (
 			},
 		},
 	}
+	// MovieCharactersColumns holds the columns for the "movie_characters" table.
+	MovieCharactersColumns = []*schema.Column{
+		{Name: "movie_id", Type: field.TypeInt},
+		{Name: "character_id", Type: field.TypeInt},
+	}
+	// MovieCharactersTable holds the schema information for the "movie_characters" table.
+	MovieCharactersTable = &schema.Table{
+		Name:       "movie_characters",
+		Columns:    MovieCharactersColumns,
+		PrimaryKey: []*schema.Column{MovieCharactersColumns[0], MovieCharactersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "movie_characters_movie_id",
+				Columns:    []*schema.Column{MovieCharactersColumns[0]},
+				RefColumns: []*schema.Column{MoviesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "movie_characters_character_id",
+				Columns:    []*schema.Column{MovieCharactersColumns[1]},
+				RefColumns: []*schema.Column{CharactersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CategoriesTable,
@@ -141,13 +157,15 @@ var (
 		MoviesTable,
 		MovieQuotesTable,
 		CategoryMoviesTable,
+		MovieCharactersTable,
 	}
 )
 
 func init() {
-	CharactersTable.ForeignKeys[0].RefTable = MoviesTable
 	MovieQuotesTable.ForeignKeys[0].RefTable = LanguagesTable
 	MovieQuotesTable.ForeignKeys[1].RefTable = MoviesTable
 	CategoryMoviesTable.ForeignKeys[0].RefTable = CategoriesTable
 	CategoryMoviesTable.ForeignKeys[1].RefTable = MoviesTable
+	MovieCharactersTable.ForeignKeys[0].RefTable = MoviesTable
+	MovieCharactersTable.ForeignKeys[1].RefTable = CharactersTable
 }

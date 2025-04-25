@@ -7,6 +7,7 @@ import (
 	"api/ent/movie"
 	"api/ent/predicate"
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -24,7 +25,6 @@ type CharacterQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Character
 	withMovie  *MovieQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,7 +75,7 @@ func (cq *CharacterQuery) QueryMovie() *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(character.Table, character.FieldID, selector),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, character.MovieTable, character.MovieColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, character.MovieTable, character.MoviePrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -370,18 +370,11 @@ func (cq *CharacterQuery) prepareQuery(ctx context.Context) error {
 func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Character, error) {
 	var (
 		nodes       = []*Character{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
 			cq.withMovie != nil,
 		}
 	)
-	if cq.withMovie != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, character.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Character).scanValues(nil, columns)
 	}
@@ -401,8 +394,9 @@ func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ch
 		return nodes, nil
 	}
 	if query := cq.withMovie; query != nil {
-		if err := cq.loadMovie(ctx, query, nodes, nil,
-			func(n *Character, e *Movie) { n.Edges.Movie = e }); err != nil {
+		if err := cq.loadMovie(ctx, query, nodes,
+			func(n *Character) { n.Edges.Movie = []*Movie{} },
+			func(n *Character, e *Movie) { n.Edges.Movie = append(n.Edges.Movie, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -410,33 +404,62 @@ func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ch
 }
 
 func (cq *CharacterQuery) loadMovie(ctx context.Context, query *MovieQuery, nodes []*Character, init func(*Character), assign func(*Character, *Movie)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Character)
-	for i := range nodes {
-		if nodes[i].movie_characters == nil {
-			continue
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Character)
+	nids := make(map[int]map[*Character]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
-		fk := *nodes[i].movie_characters
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(character.MovieTable)
+		s.Join(joinT).On(s.C(movie.FieldID), joinT.C(character.MoviePrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(character.MoviePrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(character.MoviePrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
 	}
-	query.Where(movie.IDIn(ids...))
-	neighbors, err := query.All(ctx)
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Character]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Movie](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "movie_characters" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "movie" node returned %v`, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

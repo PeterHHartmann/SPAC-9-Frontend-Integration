@@ -38,48 +38,56 @@ func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*qu
 	if err != nil {
 		return nil, err
 	}
-	
-	movie := &quotespb.Movie{
-		Name:		q.Edges.Movie.Title,
-		Category: 	category.Name,
-		Year:		int32(q.Edges.Movie.Year),
+
+	character, err := s.client.Movie.QueryCharacters(q.Edges.Movie).First(ctx)
+	if err != nil {
+		println(err)
+		return nil, err
 	}
+
 
 	return &quotespb.Quote{
 		Quote:     	q.Quote,
-		Movie: 		movie,
+		Movie:    	&quotespb.Movie{
+			Name:		q.Edges.Movie.Title,
+			Character:  &quotespb.Character{
+				Name: 	character.Name,
+				Actor: 	character.Actor,
+			},
+			Category: 	category.Name,
+			Year:		int32(q.Edges.Movie.Year),
+		},
 		Context: 	q.Context,
 		Language: 	q.Edges.Language.Name,
 	}, nil
 }
 
 func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.QuoteRequest) (*quotespb.QuoteList, error) {
-	query := s.client.MovieQuote.Query().
-		WithMovie().
-		WithLanguage()
-
-	quotes, err := query.All(ctx)
+	quotes, err := s.client.MovieQuote.Query().
+		WithMovie(func(q *ent.MovieQuery) {
+			q.WithCharacters()
+			q.WithCategory()
+		}).
+		WithLanguage().
+		All(ctx)
+	
 	if err != nil {
 		return nil, err
 	}
 
 	result := &quotespb.QuoteList{}
 	for _, q := range quotes {
-
-		category, err := s.client.Movie.QueryCategory(q.Edges.Movie).First(ctx)
-		if err != nil {
-			return nil, err
-		}
-		
-		movie := &quotespb.Movie{
-			Name:		q.Edges.Movie.Title,
-			Category: 	category.Name,
-			Year:		int32(q.Edges.Movie.Year),
-		}
-
 		result.Quotes = append(result.Quotes, &quotespb.Quote{
 			Quote:     q.Quote,
-			Movie:     movie,
+			Movie:     &quotespb.Movie{
+				Name:		q.Edges.Movie.Title,
+				Character:  &quotespb.Character{
+					Name: 	q.Edges.Movie.Edges.Characters[0].Name,
+					Actor: 	q.Edges.Movie.Edges.Characters[0].Actor,
+				},
+				Category: 	q.Edges.Movie.Edges.Category[0].Name,
+				Year:		int32(q.Edges.Movie.Year),
+			},
 			Context: 	q.Context,
 			Language:  q.Edges.Language.Name,
 		})

@@ -503,7 +503,7 @@ func (c *CharacterClient) QueryMovie(ch *Character) *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(character.Table, character.FieldID, id),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, character.MovieTable, character.MovieColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, character.MovieTable, character.MoviePrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -817,7 +817,7 @@ func (c *MovieClient) QueryCharacters(m *Movie) *CharacterQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(movie.Table, movie.FieldID, id),
 			sqlgraph.To(character.Table, character.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, movie.CharactersTable, movie.CharactersColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, movie.CharactersTable, movie.CharactersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil

@@ -288,7 +288,7 @@ func HasCharacters() predicate.Movie {
 	return predicate.Movie(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, CharactersTable, CharactersColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, CharactersTable, CharactersPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

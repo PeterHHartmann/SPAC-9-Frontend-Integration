@@ -240,10 +240,10 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 	}
 	if nodes := mc.mutation.CharactersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),

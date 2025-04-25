@@ -67,6 +67,25 @@ func Seed(ctx context.Context, client *ent.Client) error {
 			}
 		}
 
+
+		// Fetch or create Character
+		ch, err := client.Character.
+			Query().
+			Where(character.NameEQ(q.Character)).
+			Where(character.ActorEQ(q.Actor)).
+			Only(ctx)
+		if err != nil {
+			ch, err = client.Character.
+				Create().
+				SetName(q.Character).
+				SetActor(q.Actor).
+				Save(ctx)
+			if err != nil {
+				log.Printf("Failed to create character: %v", err)
+				continue
+			}
+		}
+
 		// Fetch or create Movie
 		mv, err := client.Movie.
 			Query().
@@ -78,6 +97,7 @@ func Seed(ctx context.Context, client *ent.Client) error {
 				SetTitle(q.Movie).
 				SetYear(q.Year).
 				AddCategory(ct).
+				AddCharacters(ch).
 				Save(ctx)
 			if err != nil {
 				log.Printf("Failed to create movie: %v", err)
@@ -85,23 +105,11 @@ func Seed(ctx context.Context, client *ent.Client) error {
 			}
 		}
 
-		// Fetch or create Character
-		_, err = client.Character.
-			Query().
-			Where(character.NameEQ(q.Character)).
-			Only(ctx)
-		if err != nil {
-			_, err = client.Character.
-				Create().
-				SetName(q.Character).
-				SetActor(q.Actor).
-				SetMovie(mv).
-				Save(ctx)
-			if err != nil {
-				log.Printf("Failed to create character: %v", err)
-				continue
-			}
-		}
+		// _, err = client.Character.Update().Where(character.ID(ch.ID)).AddMovie(mv).Save(ctx)
+		// if err != nil {
+		// 	log.Printf("Failed to update character: %v", err)
+		// 	continue
+		// }
 
 		// Fetch or create Language
 		lang, err := client.Language.

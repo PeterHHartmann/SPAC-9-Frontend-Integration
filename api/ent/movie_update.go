@@ -307,10 +307,10 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -320,10 +320,10 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := mu.mutation.RemovedCharactersIDs(); len(nodes) > 0 && !mu.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -336,10 +336,10 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := mu.mutation.CharactersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -721,10 +721,10 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if muo.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -734,10 +734,10 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if nodes := muo.mutation.RemovedCharactersIDs(); len(nodes) > 0 && !muo.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -750,10 +750,10 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if nodes := muo.mutation.CharactersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: []string{movie.CharactersColumn},
+			Columns: movie.CharactersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
