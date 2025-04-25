@@ -3,9 +3,9 @@
 package main
 
 import (
-	"api/db"
 	"api/ent"
 	"api/grpc"
+	"api/storage"
 	"context"
 	"log"
 
@@ -22,7 +22,7 @@ type MovieQuote struct {
 
 func main() {
 	// Get DB connection string
-	connStr := db.GetConnectionString()
+	connStr := storage.GetConnectionString()
 
 	client, err := ent.Open("postgres", connStr)
 	if err != nil {
@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("❌ Failed to run migrations: %v", err)
 	}
 
-	if err := db.Seed(ctx, client); err != nil {
+	if err := storage.Seed(ctx, client); err != nil {
 		log.Fatalf("❌ Failed to seed data: %v", err)
 	}
 

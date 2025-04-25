@@ -72,19 +72,15 @@ func (mu *MovieUpdate) AddYear(i int) *MovieUpdate {
 	return mu
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (mu *MovieUpdate) AddCategoryIDs(ids ...int) *MovieUpdate {
-	mu.mutation.AddCategoryIDs(ids...)
+// SetCategoryID sets the "category" edge to the Category entity by ID.
+func (mu *MovieUpdate) SetCategoryID(id int) *MovieUpdate {
+	mu.mutation.SetCategoryID(id)
 	return mu
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (mu *MovieUpdate) AddCategory(c ...*Category) *MovieUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return mu.AddCategoryIDs(ids...)
+// SetCategory sets the "category" edge to the Category entity.
+func (mu *MovieUpdate) SetCategory(c *Category) *MovieUpdate {
+	return mu.SetCategoryID(c.ID)
 }
 
 // AddCharacterIDs adds the "characters" edge to the Character entity by IDs.
@@ -122,25 +118,10 @@ func (mu *MovieUpdate) Mutation() *MovieMutation {
 	return mu.mutation
 }
 
-// ClearCategory clears all "category" edges to the Category entity.
+// ClearCategory clears the "category" edge to the Category entity.
 func (mu *MovieUpdate) ClearCategory() *MovieUpdate {
 	mu.mutation.ClearCategory()
 	return mu
-}
-
-// RemoveCategoryIDs removes the "category" edge to Category entities by IDs.
-func (mu *MovieUpdate) RemoveCategoryIDs(ids ...int) *MovieUpdate {
-	mu.mutation.RemoveCategoryIDs(ids...)
-	return mu
-}
-
-// RemoveCategory removes "category" edges to Category entities.
-func (mu *MovieUpdate) RemoveCategory(c ...*Category) *MovieUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return mu.RemoveCategoryIDs(ids...)
 }
 
 // ClearCharacters clears all "characters" edges to the Character entity.
@@ -233,6 +214,9 @@ func (mu *MovieUpdate) check() error {
 			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
 		}
 	}
+	if mu.mutation.CategoryCleared() && len(mu.mutation.CategoryIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Movie.category"`)
+	}
 	return nil
 }
 
@@ -262,39 +246,23 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
+			Columns: []string{movie.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := mu.mutation.RemovedCategoryIDs(); len(nodes) > 0 && !mu.mutation.CategoryCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := mu.mutation.CategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
+			Columns: []string{movie.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
@@ -307,10 +275,10 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -320,10 +288,10 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := mu.mutation.RemovedCharactersIDs(); len(nodes) > 0 && !mu.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -336,10 +304,10 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := mu.mutation.CharactersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -456,19 +424,15 @@ func (muo *MovieUpdateOne) AddYear(i int) *MovieUpdateOne {
 	return muo
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (muo *MovieUpdateOne) AddCategoryIDs(ids ...int) *MovieUpdateOne {
-	muo.mutation.AddCategoryIDs(ids...)
+// SetCategoryID sets the "category" edge to the Category entity by ID.
+func (muo *MovieUpdateOne) SetCategoryID(id int) *MovieUpdateOne {
+	muo.mutation.SetCategoryID(id)
 	return muo
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (muo *MovieUpdateOne) AddCategory(c ...*Category) *MovieUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return muo.AddCategoryIDs(ids...)
+// SetCategory sets the "category" edge to the Category entity.
+func (muo *MovieUpdateOne) SetCategory(c *Category) *MovieUpdateOne {
+	return muo.SetCategoryID(c.ID)
 }
 
 // AddCharacterIDs adds the "characters" edge to the Character entity by IDs.
@@ -506,25 +470,10 @@ func (muo *MovieUpdateOne) Mutation() *MovieMutation {
 	return muo.mutation
 }
 
-// ClearCategory clears all "category" edges to the Category entity.
+// ClearCategory clears the "category" edge to the Category entity.
 func (muo *MovieUpdateOne) ClearCategory() *MovieUpdateOne {
 	muo.mutation.ClearCategory()
 	return muo
-}
-
-// RemoveCategoryIDs removes the "category" edge to Category entities by IDs.
-func (muo *MovieUpdateOne) RemoveCategoryIDs(ids ...int) *MovieUpdateOne {
-	muo.mutation.RemoveCategoryIDs(ids...)
-	return muo
-}
-
-// RemoveCategory removes "category" edges to Category entities.
-func (muo *MovieUpdateOne) RemoveCategory(c ...*Category) *MovieUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return muo.RemoveCategoryIDs(ids...)
 }
 
 // ClearCharacters clears all "characters" edges to the Character entity.
@@ -630,6 +579,9 @@ func (muo *MovieUpdateOne) check() error {
 			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
 		}
 	}
+	if muo.mutation.CategoryCleared() && len(muo.mutation.CategoryIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Movie.category"`)
+	}
 	return nil
 }
 
@@ -676,39 +628,23 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if muo.mutation.CategoryCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
+			Columns: []string{movie.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := muo.mutation.RemovedCategoryIDs(); len(nodes) > 0 && !muo.mutation.CategoryCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := muo.mutation.CategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
+			Columns: []string{movie.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
@@ -721,10 +657,10 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if muo.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -734,10 +670,10 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if nodes := muo.mutation.RemovedCharactersIDs(); len(nodes) > 0 && !muo.mutation.CharactersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
@@ -750,10 +686,10 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 	}
 	if nodes := muo.mutation.CharactersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),

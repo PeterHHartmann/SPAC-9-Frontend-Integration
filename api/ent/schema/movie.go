@@ -43,10 +43,9 @@ func (Movie) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("category", Category.Type).
 			Ref("movies").
+			Unique().
 			Required(),
-		edge.From("characters", Character.Type). 
-			Ref("movies").
-			Required(),
+		edge.To("characters", Character.Type),
 		edge.To("quotes", MovieQuote.Type),
 	}
 }

@@ -290,7 +290,7 @@ func HasMovie() predicate.Character {
 	return predicate.Character(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, MovieTable, MoviePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, MovieTable, MovieColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -300,6 +300,29 @@ func HasMovie() predicate.Character {
 func HasMovieWith(preds ...predicate.Movie) predicate.Character {
 	return predicate.Character(func(s *sql.Selector) {
 		step := newMovieStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasQuotes applies the HasEdge predicate on the "quotes" edge.
+func HasQuotes() predicate.Character {
+	return predicate.Character(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, QuotesTable, QuotesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasQuotesWith applies the HasEdge predicate on the "quotes" edge with a given conditions (other predicates).
+func HasQuotesWith(preds ...predicate.MovieQuote) predicate.Character {
+	return predicate.Character(func(s *sql.Selector) {
+		step := newQuotesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

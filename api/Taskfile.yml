@@ -34,10 +34,10 @@ tasks:
 
   ent:gen:
     cmds:
-      - go generate ./ent
+      - go generate .
     desc: Generate database models based on ent schema
     generates:
-      - api/db/ent/*.go
+      - api/ent/*.go
 
   ent:migrate:create:
     dotenv: ["../.env.example"]
@@ -46,7 +46,7 @@ tasks:
     vars:
       DIR: "file://ent/migrate/migrations"
       TO: "ent://ent/schema"
-      DEV_URL: "docker://postgres/15/test?search_path=public"
+      DEV_URL: "docker://postgres/17/test?search_path=public"
 
     desc: Create database migration
   
@@ -73,4 +73,4 @@ tasks:
       - atlas migrate lint --dir "{{.DIR}}" --dev-url "{{.DEV_URL}}" --latest 1
     vars:
       DIR: "file://ent/migrate/migrations"
-      DEV_URL: "docker://postgres/15/test?search_path=public"
+      DEV_URL: "docker://postgres/17/test?search_path=public"

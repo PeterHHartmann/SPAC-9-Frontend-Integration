@@ -5,6 +5,7 @@ package ent
 import (
 	"api/ent/character"
 	"api/ent/movie"
+	"api/ent/moviequote"
 	"context"
 	"errors"
 	"fmt"
@@ -61,19 +62,30 @@ func (cc *CharacterCreate) SetActor(s string) *CharacterCreate {
 	return cc
 }
 
-// AddMovieIDs adds the "movie" edge to the Movie entity by IDs.
-func (cc *CharacterCreate) AddMovieIDs(ids ...int) *CharacterCreate {
-	cc.mutation.AddMovieIDs(ids...)
+// SetMovieID sets the "movie" edge to the Movie entity by ID.
+func (cc *CharacterCreate) SetMovieID(id int) *CharacterCreate {
+	cc.mutation.SetMovieID(id)
 	return cc
 }
 
-// AddMovie adds the "movie" edges to the Movie entity.
-func (cc *CharacterCreate) AddMovie(m ...*Movie) *CharacterCreate {
+// SetMovie sets the "movie" edge to the Movie entity.
+func (cc *CharacterCreate) SetMovie(m *Movie) *CharacterCreate {
+	return cc.SetMovieID(m.ID)
+}
+
+// AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by IDs.
+func (cc *CharacterCreate) AddQuoteIDs(ids ...int) *CharacterCreate {
+	cc.mutation.AddQuoteIDs(ids...)
+	return cc
+}
+
+// AddQuotes adds the "quotes" edges to the MovieQuote entity.
+func (cc *CharacterCreate) AddQuotes(m ...*MovieQuote) *CharacterCreate {
 	ids := make([]int, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return cc.AddMovieIDs(ids...)
+	return cc.AddQuoteIDs(ids...)
 }
 
 // Mutation returns the CharacterMutation object of the builder.
@@ -145,6 +157,9 @@ func (cc *CharacterCreate) check() error {
 			return &ValidationError{Name: "actor", err: fmt.Errorf(`ent: validator failed for field "Character.actor": %w`, err)}
 		}
 	}
+	if len(cc.mutation.MovieIDs()) == 0 {
+		return &ValidationError{Name: "movie", err: errors.New(`ent: missing required edge "Character.movie"`)}
+	}
 	return nil
 }
 
@@ -189,13 +204,30 @@ func (cc *CharacterCreate) createSpec() (*Character, *sqlgraph.CreateSpec) {
 	}
 	if nodes := cc.mutation.MovieIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   character.MovieTable,
-			Columns: character.MoviePrimaryKey,
+			Columns: []string{character.MovieColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(movie.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.movie_characters = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.QuotesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   character.QuotesTable,
+			Columns: []string{character.QuotesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(moviequote.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

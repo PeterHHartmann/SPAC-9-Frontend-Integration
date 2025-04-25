@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"api/ent/character"
 	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
@@ -68,17 +69,20 @@ func (mqc *MovieQuoteCreate) SetMovieID(id int) *MovieQuoteCreate {
 	return mqc
 }
 
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (mqc *MovieQuoteCreate) SetNillableMovieID(id *int) *MovieQuoteCreate {
-	if id != nil {
-		mqc = mqc.SetMovieID(*id)
-	}
-	return mqc
-}
-
 // SetMovie sets the "movie" edge to the Movie entity.
 func (mqc *MovieQuoteCreate) SetMovie(m *Movie) *MovieQuoteCreate {
 	return mqc.SetMovieID(m.ID)
+}
+
+// SetCharacterID sets the "character" edge to the Character entity by ID.
+func (mqc *MovieQuoteCreate) SetCharacterID(id int) *MovieQuoteCreate {
+	mqc.mutation.SetCharacterID(id)
+	return mqc
+}
+
+// SetCharacter sets the "character" edge to the Character entity.
+func (mqc *MovieQuoteCreate) SetCharacter(c *Character) *MovieQuoteCreate {
+	return mqc.SetCharacterID(c.ID)
 }
 
 // SetLanguageID sets the "language" edge to the Language entity by ID.
@@ -164,6 +168,12 @@ func (mqc *MovieQuoteCreate) check() error {
 	if _, ok := mqc.mutation.Context(); !ok {
 		return &ValidationError{Name: "context", err: errors.New(`ent: missing required field "MovieQuote.context"`)}
 	}
+	if len(mqc.mutation.MovieIDs()) == 0 {
+		return &ValidationError{Name: "movie", err: errors.New(`ent: missing required edge "MovieQuote.movie"`)}
+	}
+	if len(mqc.mutation.CharacterIDs()) == 0 {
+		return &ValidationError{Name: "character", err: errors.New(`ent: missing required edge "MovieQuote.character"`)}
+	}
 	return nil
 }
 
@@ -221,6 +231,23 @@ func (mqc *MovieQuoteCreate) createSpec() (*MovieQuote, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.movie_quotes = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mqc.mutation.CharacterIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   moviequote.CharacterTable,
+			Columns: []string{moviequote.CharacterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.character_quotes = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mqc.mutation.LanguageIDs(); len(nodes) > 0 {

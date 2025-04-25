@@ -220,7 +220,7 @@ func HasMovies() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, MoviesTable, MoviesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, MoviesTable, MoviesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

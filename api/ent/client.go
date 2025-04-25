@@ -354,7 +354,7 @@ func (c *CategoryClient) QueryMovies(ca *Category) *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, id),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, category.MoviesTable, category.MoviesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, category.MoviesTable, category.MoviesColumn),
 		)
 		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 		return fromV, nil
@@ -503,7 +503,23 @@ func (c *CharacterClient) QueryMovie(ch *Character) *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(character.Table, character.FieldID, id),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, character.MovieTable, character.MoviePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, character.MovieTable, character.MovieColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryQuotes queries the quotes edge of a Character.
+func (c *CharacterClient) QueryQuotes(ch *Character) *MovieQuoteQuery {
+	query := (&MovieQuoteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(character.Table, character.FieldID, id),
+			sqlgraph.To(moviequote.Table, moviequote.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, character.QuotesTable, character.QuotesColumn),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -801,7 +817,7 @@ func (c *MovieClient) QueryCategory(m *Movie) *CategoryQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(movie.Table, movie.FieldID, id),
 			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, movie.CategoryTable, movie.CategoryPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, movie.CategoryTable, movie.CategoryColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -817,7 +833,7 @@ func (c *MovieClient) QueryCharacters(m *Movie) *CharacterQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(movie.Table, movie.FieldID, id),
 			sqlgraph.To(character.Table, character.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, movie.CharactersTable, movie.CharactersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, movie.CharactersTable, movie.CharactersColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -983,6 +999,22 @@ func (c *MovieQuoteClient) QueryMovie(mq *MovieQuote) *MovieQuery {
 			sqlgraph.From(moviequote.Table, moviequote.FieldID, id),
 			sqlgraph.To(movie.Table, movie.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, moviequote.MovieTable, moviequote.MovieColumn),
+		)
+		fromV = sqlgraph.Neighbors(mq.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCharacter queries the character edge of a MovieQuote.
+func (c *MovieQuoteClient) QueryCharacter(mq *MovieQuote) *CharacterQuery {
+	query := (&CharacterClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mq.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(moviequote.Table, moviequote.FieldID, id),
+			sqlgraph.To(character.Table, character.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moviequote.CharacterTable, moviequote.CharacterColumn),
 		)
 		fromV = sqlgraph.Neighbors(mq.driver.Dialect(), step)
 		return fromV, nil

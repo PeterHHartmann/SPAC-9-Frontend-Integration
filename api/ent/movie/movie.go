@@ -30,16 +30,20 @@ const (
 	EdgeQuotes = "quotes"
 	// Table holds the table name of the movie in the database.
 	Table = "movies"
-	// CategoryTable is the table that holds the category relation/edge. The primary key declared below.
-	CategoryTable = "category_movies"
+	// CategoryTable is the table that holds the category relation/edge.
+	CategoryTable = "movies"
 	// CategoryInverseTable is the table name for the Category entity.
 	// It exists in this package in order to avoid circular dependency with the "category" package.
 	CategoryInverseTable = "categories"
-	// CharactersTable is the table that holds the characters relation/edge. The primary key declared below.
-	CharactersTable = "movie_characters"
+	// CategoryColumn is the table column denoting the category relation/edge.
+	CategoryColumn = "category_movies"
+	// CharactersTable is the table that holds the characters relation/edge.
+	CharactersTable = "characters"
 	// CharactersInverseTable is the table name for the Character entity.
 	// It exists in this package in order to avoid circular dependency with the "character" package.
 	CharactersInverseTable = "characters"
+	// CharactersColumn is the table column denoting the characters relation/edge.
+	CharactersColumn = "movie_characters"
 	// QuotesTable is the table that holds the quotes relation/edge.
 	QuotesTable = "movie_quotes"
 	// QuotesInverseTable is the table name for the MovieQuote entity.
@@ -58,19 +62,21 @@ var Columns = []string{
 	FieldYear,
 }
 
-var (
-	// CategoryPrimaryKey and CategoryColumn2 are the table columns denoting the
-	// primary key for the category relation (M2M).
-	CategoryPrimaryKey = []string{"category_id", "movie_id"}
-	// CharactersPrimaryKey and CharactersColumn2 are the table columns denoting the
-	// primary key for the characters relation (M2M).
-	CharactersPrimaryKey = []string{"movie_id", "character_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "movies"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"category_movies",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -118,17 +124,10 @@ func ByYear(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldYear, opts...).ToFunc()
 }
 
-// ByCategoryCount orders the results by category count.
-func ByCategoryCount(opts ...sql.OrderTermOption) OrderOption {
+// ByCategoryField orders the results by category field.
+func ByCategoryField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newCategoryStep(), opts...)
-	}
-}
-
-// ByCategory orders the results by category terms.
-func ByCategory(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCategoryStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newCategoryStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -163,14 +162,14 @@ func newCategoryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CategoryInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, CategoryTable, CategoryPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
 	)
 }
 func newCharactersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CharactersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, CharactersTable, CharactersPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, CharactersTable, CharactersColumn),
 	)
 }
 func newQuotesStep() *sqlgraph.Step {

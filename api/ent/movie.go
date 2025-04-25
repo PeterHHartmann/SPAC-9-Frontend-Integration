@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"api/ent/category"
 	"api/ent/movie"
 	"fmt"
 	"strings"
@@ -27,14 +28,15 @@ type Movie struct {
 	Year int `json:"year,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MovieQuery when eager-loading is set.
-	Edges        MovieEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges           MovieEdges `json:"edges"`
+	category_movies *int
+	selectValues    sql.SelectValues
 }
 
 // MovieEdges holds the relations/edges for other nodes in the graph.
 type MovieEdges struct {
 	// Category holds the value of the category edge.
-	Category []*Category `json:"category,omitempty"`
+	Category *Category `json:"category,omitempty"`
 	// Characters holds the value of the characters edge.
 	Characters []*Character `json:"characters,omitempty"`
 	// Quotes holds the value of the quotes edge.
@@ -45,10 +47,12 @@ type MovieEdges struct {
 }
 
 // CategoryOrErr returns the Category value or an error if the edge
-// was not loaded in eager-loading.
-func (e MovieEdges) CategoryOrErr() ([]*Category, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MovieEdges) CategoryOrErr() (*Category, error) {
+	if e.Category != nil {
 		return e.Category, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: category.Label}
 	}
 	return nil, &NotLoadedError{edge: "category"}
 }
@@ -82,6 +86,8 @@ func (*Movie) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case movie.FieldCreatedAt, movie.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case movie.ForeignKeys[0]: // category_movies
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -126,6 +132,13 @@ func (m *Movie) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field year", values[i])
 			} else if value.Valid {
 				m.Year = int(value.Int64)
+			}
+		case movie.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field category_movies", value)
+			} else if value.Valid {
+				m.category_movies = new(int)
+				*m.category_movies = int(value.Int64)
 			}
 		default:
 			m.selectValues.Set(columns[i], values[i])

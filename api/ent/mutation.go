@@ -573,9 +573,11 @@ type CharacterMutation struct {
 	name          *string
 	actor         *string
 	clearedFields map[string]struct{}
-	movie         map[int]struct{}
-	removedmovie  map[int]struct{}
+	movie         *int
 	clearedmovie  bool
+	quotes        map[int]struct{}
+	removedquotes map[int]struct{}
+	clearedquotes bool
 	done          bool
 	oldValue      func(context.Context) (*Character, error)
 	predicates    []predicate.Character
@@ -823,14 +825,9 @@ func (m *CharacterMutation) ResetActor() {
 	m.actor = nil
 }
 
-// AddMovieIDs adds the "movie" edge to the Movie entity by ids.
-func (m *CharacterMutation) AddMovieIDs(ids ...int) {
-	if m.movie == nil {
-		m.movie = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.movie[ids[i]] = struct{}{}
-	}
+// SetMovieID sets the "movie" edge to the Movie entity by id.
+func (m *CharacterMutation) SetMovieID(id int) {
+	m.movie = &id
 }
 
 // ClearMovie clears the "movie" edge to the Movie entity.
@@ -843,29 +840,20 @@ func (m *CharacterMutation) MovieCleared() bool {
 	return m.clearedmovie
 }
 
-// RemoveMovieIDs removes the "movie" edge to the Movie entity by IDs.
-func (m *CharacterMutation) RemoveMovieIDs(ids ...int) {
-	if m.removedmovie == nil {
-		m.removedmovie = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.movie, ids[i])
-		m.removedmovie[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMovie returns the removed IDs of the "movie" edge to the Movie entity.
-func (m *CharacterMutation) RemovedMovieIDs() (ids []int) {
-	for id := range m.removedmovie {
-		ids = append(ids, id)
+// MovieID returns the "movie" edge ID in the mutation.
+func (m *CharacterMutation) MovieID() (id int, exists bool) {
+	if m.movie != nil {
+		return *m.movie, true
 	}
 	return
 }
 
 // MovieIDs returns the "movie" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MovieID instead. It exists only for internal usage by the builders.
 func (m *CharacterMutation) MovieIDs() (ids []int) {
-	for id := range m.movie {
-		ids = append(ids, id)
+	if id := m.movie; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -874,7 +862,60 @@ func (m *CharacterMutation) MovieIDs() (ids []int) {
 func (m *CharacterMutation) ResetMovie() {
 	m.movie = nil
 	m.clearedmovie = false
-	m.removedmovie = nil
+}
+
+// AddQuoteIDs adds the "quotes" edge to the MovieQuote entity by ids.
+func (m *CharacterMutation) AddQuoteIDs(ids ...int) {
+	if m.quotes == nil {
+		m.quotes = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.quotes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearQuotes clears the "quotes" edge to the MovieQuote entity.
+func (m *CharacterMutation) ClearQuotes() {
+	m.clearedquotes = true
+}
+
+// QuotesCleared reports if the "quotes" edge to the MovieQuote entity was cleared.
+func (m *CharacterMutation) QuotesCleared() bool {
+	return m.clearedquotes
+}
+
+// RemoveQuoteIDs removes the "quotes" edge to the MovieQuote entity by IDs.
+func (m *CharacterMutation) RemoveQuoteIDs(ids ...int) {
+	if m.removedquotes == nil {
+		m.removedquotes = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.quotes, ids[i])
+		m.removedquotes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedQuotes returns the removed IDs of the "quotes" edge to the MovieQuote entity.
+func (m *CharacterMutation) RemovedQuotesIDs() (ids []int) {
+	for id := range m.removedquotes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// QuotesIDs returns the "quotes" edge IDs in the mutation.
+func (m *CharacterMutation) QuotesIDs() (ids []int) {
+	for id := range m.quotes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetQuotes resets all changes to the "quotes" edge.
+func (m *CharacterMutation) ResetQuotes() {
+	m.quotes = nil
+	m.clearedquotes = false
+	m.removedquotes = nil
 }
 
 // Where appends a list predicates to the CharacterMutation builder.
@@ -1061,9 +1102,12 @@ func (m *CharacterMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CharacterMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.movie != nil {
 		edges = append(edges, character.EdgeMovie)
+	}
+	if m.quotes != nil {
+		edges = append(edges, character.EdgeQuotes)
 	}
 	return edges
 }
@@ -1073,8 +1117,12 @@ func (m *CharacterMutation) AddedEdges() []string {
 func (m *CharacterMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case character.EdgeMovie:
-		ids := make([]ent.Value, 0, len(m.movie))
-		for id := range m.movie {
+		if id := m.movie; id != nil {
+			return []ent.Value{*id}
+		}
+	case character.EdgeQuotes:
+		ids := make([]ent.Value, 0, len(m.quotes))
+		for id := range m.quotes {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1084,9 +1132,9 @@ func (m *CharacterMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CharacterMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedmovie != nil {
-		edges = append(edges, character.EdgeMovie)
+	edges := make([]string, 0, 2)
+	if m.removedquotes != nil {
+		edges = append(edges, character.EdgeQuotes)
 	}
 	return edges
 }
@@ -1095,9 +1143,9 @@ func (m *CharacterMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *CharacterMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case character.EdgeMovie:
-		ids := make([]ent.Value, 0, len(m.removedmovie))
-		for id := range m.removedmovie {
+	case character.EdgeQuotes:
+		ids := make([]ent.Value, 0, len(m.removedquotes))
+		for id := range m.removedquotes {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1107,9 +1155,12 @@ func (m *CharacterMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CharacterMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedmovie {
 		edges = append(edges, character.EdgeMovie)
+	}
+	if m.clearedquotes {
+		edges = append(edges, character.EdgeQuotes)
 	}
 	return edges
 }
@@ -1120,6 +1171,8 @@ func (m *CharacterMutation) EdgeCleared(name string) bool {
 	switch name {
 	case character.EdgeMovie:
 		return m.clearedmovie
+	case character.EdgeQuotes:
+		return m.clearedquotes
 	}
 	return false
 }
@@ -1128,6 +1181,9 @@ func (m *CharacterMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *CharacterMutation) ClearEdge(name string) error {
 	switch name {
+	case character.EdgeMovie:
+		m.ClearMovie()
+		return nil
 	}
 	return fmt.Errorf("unknown Character unique edge %s", name)
 }
@@ -1138,6 +1194,9 @@ func (m *CharacterMutation) ResetEdge(name string) error {
 	switch name {
 	case character.EdgeMovie:
 		m.ResetMovie()
+		return nil
+	case character.EdgeQuotes:
+		m.ResetQuotes()
 		return nil
 	}
 	return fmt.Errorf("unknown Character edge %s", name)
@@ -1682,8 +1741,7 @@ type MovieMutation struct {
 	year              *int
 	addyear           *int
 	clearedFields     map[string]struct{}
-	category          map[int]struct{}
-	removedcategory   map[int]struct{}
+	category          *int
 	clearedcategory   bool
 	characters        map[int]struct{}
 	removedcharacters map[int]struct{}
@@ -1958,14 +2016,9 @@ func (m *MovieMutation) ResetYear() {
 	m.addyear = nil
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by ids.
-func (m *MovieMutation) AddCategoryIDs(ids ...int) {
-	if m.category == nil {
-		m.category = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.category[ids[i]] = struct{}{}
-	}
+// SetCategoryID sets the "category" edge to the Category entity by id.
+func (m *MovieMutation) SetCategoryID(id int) {
+	m.category = &id
 }
 
 // ClearCategory clears the "category" edge to the Category entity.
@@ -1978,29 +2031,20 @@ func (m *MovieMutation) CategoryCleared() bool {
 	return m.clearedcategory
 }
 
-// RemoveCategoryIDs removes the "category" edge to the Category entity by IDs.
-func (m *MovieMutation) RemoveCategoryIDs(ids ...int) {
-	if m.removedcategory == nil {
-		m.removedcategory = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.category, ids[i])
-		m.removedcategory[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedCategory returns the removed IDs of the "category" edge to the Category entity.
-func (m *MovieMutation) RemovedCategoryIDs() (ids []int) {
-	for id := range m.removedcategory {
-		ids = append(ids, id)
+// CategoryID returns the "category" edge ID in the mutation.
+func (m *MovieMutation) CategoryID() (id int, exists bool) {
+	if m.category != nil {
+		return *m.category, true
 	}
 	return
 }
 
 // CategoryIDs returns the "category" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CategoryID instead. It exists only for internal usage by the builders.
 func (m *MovieMutation) CategoryIDs() (ids []int) {
-	for id := range m.category {
-		ids = append(ids, id)
+	if id := m.category; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -2009,7 +2053,6 @@ func (m *MovieMutation) CategoryIDs() (ids []int) {
 func (m *MovieMutation) ResetCategory() {
 	m.category = nil
 	m.clearedcategory = false
-	m.removedcategory = nil
 }
 
 // AddCharacterIDs adds the "characters" edge to the Character entity by ids.
@@ -2337,11 +2380,9 @@ func (m *MovieMutation) AddedEdges() []string {
 func (m *MovieMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case movie.EdgeCategory:
-		ids := make([]ent.Value, 0, len(m.category))
-		for id := range m.category {
-			ids = append(ids, id)
+		if id := m.category; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case movie.EdgeCharacters:
 		ids := make([]ent.Value, 0, len(m.characters))
 		for id := range m.characters {
@@ -2361,9 +2402,6 @@ func (m *MovieMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MovieMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.removedcategory != nil {
-		edges = append(edges, movie.EdgeCategory)
-	}
 	if m.removedcharacters != nil {
 		edges = append(edges, movie.EdgeCharacters)
 	}
@@ -2377,12 +2415,6 @@ func (m *MovieMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *MovieMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case movie.EdgeCategory:
-		ids := make([]ent.Value, 0, len(m.removedcategory))
-		for id := range m.removedcategory {
-			ids = append(ids, id)
-		}
-		return ids
 	case movie.EdgeCharacters:
 		ids := make([]ent.Value, 0, len(m.removedcharacters))
 		for id := range m.removedcharacters {
@@ -2432,6 +2464,9 @@ func (m *MovieMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *MovieMutation) ClearEdge(name string) error {
 	switch name {
+	case movie.EdgeCategory:
+		m.ClearCategory()
+		return nil
 	}
 	return fmt.Errorf("unknown Movie unique edge %s", name)
 }
@@ -2456,21 +2491,23 @@ func (m *MovieMutation) ResetEdge(name string) error {
 // MovieQuoteMutation represents an operation that mutates the MovieQuote nodes in the graph.
 type MovieQuoteMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	created_at      *time.Time
-	updated_at      *time.Time
-	quote           *string
-	context         *string
-	clearedFields   map[string]struct{}
-	movie           *int
-	clearedmovie    bool
-	language        *int
-	clearedlanguage bool
-	done            bool
-	oldValue        func(context.Context) (*MovieQuote, error)
-	predicates      []predicate.MovieQuote
+	op               Op
+	typ              string
+	id               *int
+	created_at       *time.Time
+	updated_at       *time.Time
+	quote            *string
+	context          *string
+	clearedFields    map[string]struct{}
+	movie            *int
+	clearedmovie     bool
+	character        *int
+	clearedcharacter bool
+	language         *int
+	clearedlanguage  bool
+	done             bool
+	oldValue         func(context.Context) (*MovieQuote, error)
+	predicates       []predicate.MovieQuote
 }
 
 var _ ent.Mutation = (*MovieQuoteMutation)(nil)
@@ -2754,6 +2791,45 @@ func (m *MovieQuoteMutation) ResetMovie() {
 	m.clearedmovie = false
 }
 
+// SetCharacterID sets the "character" edge to the Character entity by id.
+func (m *MovieQuoteMutation) SetCharacterID(id int) {
+	m.character = &id
+}
+
+// ClearCharacter clears the "character" edge to the Character entity.
+func (m *MovieQuoteMutation) ClearCharacter() {
+	m.clearedcharacter = true
+}
+
+// CharacterCleared reports if the "character" edge to the Character entity was cleared.
+func (m *MovieQuoteMutation) CharacterCleared() bool {
+	return m.clearedcharacter
+}
+
+// CharacterID returns the "character" edge ID in the mutation.
+func (m *MovieQuoteMutation) CharacterID() (id int, exists bool) {
+	if m.character != nil {
+		return *m.character, true
+	}
+	return
+}
+
+// CharacterIDs returns the "character" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CharacterID instead. It exists only for internal usage by the builders.
+func (m *MovieQuoteMutation) CharacterIDs() (ids []int) {
+	if id := m.character; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCharacter resets all changes to the "character" edge.
+func (m *MovieQuoteMutation) ResetCharacter() {
+	m.character = nil
+	m.clearedcharacter = false
+}
+
 // SetLanguageID sets the "language" edge to the Language entity by id.
 func (m *MovieQuoteMutation) SetLanguageID(id int) {
 	m.language = &id
@@ -2977,9 +3053,12 @@ func (m *MovieQuoteMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MovieQuoteMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.movie != nil {
 		edges = append(edges, moviequote.EdgeMovie)
+	}
+	if m.character != nil {
+		edges = append(edges, moviequote.EdgeCharacter)
 	}
 	if m.language != nil {
 		edges = append(edges, moviequote.EdgeLanguage)
@@ -2995,6 +3074,10 @@ func (m *MovieQuoteMutation) AddedIDs(name string) []ent.Value {
 		if id := m.movie; id != nil {
 			return []ent.Value{*id}
 		}
+	case moviequote.EdgeCharacter:
+		if id := m.character; id != nil {
+			return []ent.Value{*id}
+		}
 	case moviequote.EdgeLanguage:
 		if id := m.language; id != nil {
 			return []ent.Value{*id}
@@ -3005,7 +3088,7 @@ func (m *MovieQuoteMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MovieQuoteMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -3017,9 +3100,12 @@ func (m *MovieQuoteMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MovieQuoteMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedmovie {
 		edges = append(edges, moviequote.EdgeMovie)
+	}
+	if m.clearedcharacter {
+		edges = append(edges, moviequote.EdgeCharacter)
 	}
 	if m.clearedlanguage {
 		edges = append(edges, moviequote.EdgeLanguage)
@@ -3033,6 +3119,8 @@ func (m *MovieQuoteMutation) EdgeCleared(name string) bool {
 	switch name {
 	case moviequote.EdgeMovie:
 		return m.clearedmovie
+	case moviequote.EdgeCharacter:
+		return m.clearedcharacter
 	case moviequote.EdgeLanguage:
 		return m.clearedlanguage
 	}
@@ -3045,6 +3133,9 @@ func (m *MovieQuoteMutation) ClearEdge(name string) error {
 	switch name {
 	case moviequote.EdgeMovie:
 		m.ClearMovie()
+		return nil
+	case moviequote.EdgeCharacter:
+		m.ClearCharacter()
 		return nil
 	case moviequote.EdgeLanguage:
 		m.ClearLanguage()
@@ -3059,6 +3150,9 @@ func (m *MovieQuoteMutation) ResetEdge(name string) error {
 	switch name {
 	case moviequote.EdgeMovie:
 		m.ResetMovie()
+		return nil
+	case moviequote.EdgeCharacter:
+		m.ResetCharacter()
 		return nil
 	case moviequote.EdgeLanguage:
 		m.ResetLanguage()

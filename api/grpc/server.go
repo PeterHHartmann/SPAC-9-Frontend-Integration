@@ -25,8 +25,11 @@ func NewQuoteServer(client *ent.Client) *quoteServer {
 func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*quotespb.Quote, error) {
 	// Use the SQL query to order by random in PostgreSQL
 	q, err := s.client.MovieQuote.Query().
-		WithMovie().
+		WithMovie(func(q *ent.MovieQuery) {
+			q.WithCategory()
+		}).
 		WithLanguage().
+		WithCharacter().
 		Limit(1).
 		Order(sql.OrderByRand()).           // Randomize the order
 		First(ctx)
@@ -34,41 +37,30 @@ func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*qu
 		return nil, err
 	}
 
-	category, err := s.client.Movie.QueryCategory(q.Edges.Movie).First(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	character, err := s.client.Movie.QueryCharacters(q.Edges.Movie).First(ctx)
-	if err != nil {
-		println(err)
-		return nil, err
-	}
-
 
 	return &quotespb.Quote{
-		Quote:     	q.Quote,
-		Movie:    	&quotespb.Movie{
+		Quote:     q.Quote,
+		Movie:     &quotespb.Movie{
 			Name:		q.Edges.Movie.Title,
 			Character:  &quotespb.Character{
-				Name: 	character.Name,
-				Actor: 	character.Actor,
+				Name: 	q.Edges.Character.Name,
+				Actor: 	q.Edges.Character.Actor,
 			},
-			Category: 	category.Name,
+			Category: 	q.Edges.Movie.Edges.Category.Name,
 			Year:		int32(q.Edges.Movie.Year),
 		},
 		Context: 	q.Context,
-		Language: 	q.Edges.Language.Name,
+		Language:  q.Edges.Language.Name,
 	}, nil
 }
 
 func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.QuoteRequest) (*quotespb.QuoteList, error) {
 	quotes, err := s.client.MovieQuote.Query().
 		WithMovie(func(q *ent.MovieQuery) {
-			q.WithCharacters()
 			q.WithCategory()
 		}).
 		WithLanguage().
+		WithCharacter().
 		All(ctx)
 	
 	if err != nil {
@@ -82,10 +74,10 @@ func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.QuoteRequest)
 			Movie:     &quotespb.Movie{
 				Name:		q.Edges.Movie.Title,
 				Character:  &quotespb.Character{
-					Name: 	q.Edges.Movie.Edges.Characters[0].Name,
-					Actor: 	q.Edges.Movie.Edges.Characters[0].Actor,
+					Name: 	q.Edges.Character.Name,
+					Actor: 	q.Edges.Character.Actor,
 				},
-				Category: 	q.Edges.Movie.Edges.Category[0].Name,
+				Category: 	q.Edges.Movie.Edges.Category.Name,
 				Year:		int32(q.Edges.Movie.Year),
 			},
 			Context: 	q.Context,

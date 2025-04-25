@@ -63,19 +63,15 @@ func (mc *MovieCreate) SetYear(i int) *MovieCreate {
 	return mc
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (mc *MovieCreate) AddCategoryIDs(ids ...int) *MovieCreate {
-	mc.mutation.AddCategoryIDs(ids...)
+// SetCategoryID sets the "category" edge to the Category entity by ID.
+func (mc *MovieCreate) SetCategoryID(id int) *MovieCreate {
+	mc.mutation.SetCategoryID(id)
 	return mc
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (mc *MovieCreate) AddCategory(c ...*Category) *MovieCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return mc.AddCategoryIDs(ids...)
+// SetCategory sets the "category" edge to the Category entity.
+func (mc *MovieCreate) SetCategory(c *Category) *MovieCreate {
+	return mc.SetCategoryID(c.ID)
 }
 
 // AddCharacterIDs adds the "characters" edge to the Character entity by IDs.
@@ -224,10 +220,10 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 	}
 	if nodes := mc.mutation.CategoryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   movie.CategoryTable,
-			Columns: movie.CategoryPrimaryKey,
+			Columns: []string{movie.CategoryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(category.FieldID, field.TypeInt),
@@ -236,14 +232,15 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.category_movies = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mc.mutation.CharactersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   movie.CharactersTable,
-			Columns: movie.CharactersPrimaryKey,
+			Columns: []string{movie.CharactersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(character.FieldID, field.TypeInt),

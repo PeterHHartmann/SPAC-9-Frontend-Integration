@@ -24,6 +24,8 @@ const (
 	FieldContext = "context"
 	// EdgeMovie holds the string denoting the movie edge name in mutations.
 	EdgeMovie = "movie"
+	// EdgeCharacter holds the string denoting the character edge name in mutations.
+	EdgeCharacter = "character"
 	// EdgeLanguage holds the string denoting the language edge name in mutations.
 	EdgeLanguage = "language"
 	// Table holds the table name of the moviequote in the database.
@@ -35,6 +37,13 @@ const (
 	MovieInverseTable = "movies"
 	// MovieColumn is the table column denoting the movie relation/edge.
 	MovieColumn = "movie_quotes"
+	// CharacterTable is the table that holds the character relation/edge.
+	CharacterTable = "movie_quotes"
+	// CharacterInverseTable is the table name for the Character entity.
+	// It exists in this package in order to avoid circular dependency with the "character" package.
+	CharacterInverseTable = "characters"
+	// CharacterColumn is the table column denoting the character relation/edge.
+	CharacterColumn = "character_quotes"
 	// LanguageTable is the table that holds the language relation/edge.
 	LanguageTable = "movie_quotes"
 	// LanguageInverseTable is the table name for the Language entity.
@@ -56,6 +65,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "movie_quotes"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"character_quotes",
 	"language_quotes",
 	"movie_quotes",
 }
@@ -121,6 +131,13 @@ func ByMovieField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// ByCharacterField orders the results by character field.
+func ByCharacterField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCharacterStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByLanguageField orders the results by language field.
 func ByLanguageField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -132,6 +149,13 @@ func newMovieStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MovieInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, MovieTable, MovieColumn),
+	)
+}
+func newCharacterStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CharacterInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CharacterTable, CharacterColumn),
 	)
 }
 func newLanguageStep() *sqlgraph.Step {

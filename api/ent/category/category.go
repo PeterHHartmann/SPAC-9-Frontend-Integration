@@ -24,11 +24,13 @@ const (
 	EdgeMovies = "movies"
 	// Table holds the table name of the category in the database.
 	Table = "categories"
-	// MoviesTable is the table that holds the movies relation/edge. The primary key declared below.
-	MoviesTable = "category_movies"
+	// MoviesTable is the table that holds the movies relation/edge.
+	MoviesTable = "movies"
 	// MoviesInverseTable is the table name for the Movie entity.
 	// It exists in this package in order to avoid circular dependency with the "movie" package.
 	MoviesInverseTable = "movies"
+	// MoviesColumn is the table column denoting the movies relation/edge.
+	MoviesColumn = "category_movies"
 )
 
 // Columns holds all SQL columns for category fields.
@@ -38,12 +40,6 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldName,
 }
-
-var (
-	// MoviesPrimaryKey and MoviesColumn2 are the table columns denoting the
-	// primary key for the movies relation (M2M).
-	MoviesPrimaryKey = []string{"category_id", "movie_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -106,6 +102,6 @@ func newMoviesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MoviesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, MoviesTable, MoviesPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, MoviesTable, MoviesColumn),
 	)
 }

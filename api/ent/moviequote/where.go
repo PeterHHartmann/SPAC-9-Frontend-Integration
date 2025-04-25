@@ -308,6 +308,29 @@ func HasMovieWith(preds ...predicate.Movie) predicate.MovieQuote {
 	})
 }
 
+// HasCharacter applies the HasEdge predicate on the "character" edge.
+func HasCharacter() predicate.MovieQuote {
+	return predicate.MovieQuote(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CharacterTable, CharacterColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCharacterWith applies the HasEdge predicate on the "character" edge with a given conditions (other predicates).
+func HasCharacterWith(preds ...predicate.Character) predicate.MovieQuote {
+	return predicate.MovieQuote(func(s *sql.Selector) {
+		step := newCharacterStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasLanguage applies the HasEdge predicate on the "language" edge.
 func HasLanguage() predicate.MovieQuote {
 	return predicate.MovieQuote(func(s *sql.Selector) {

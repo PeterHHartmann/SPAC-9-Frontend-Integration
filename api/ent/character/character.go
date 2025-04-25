@@ -24,13 +24,24 @@ const (
 	FieldActor = "actor"
 	// EdgeMovie holds the string denoting the movie edge name in mutations.
 	EdgeMovie = "movie"
+	// EdgeQuotes holds the string denoting the quotes edge name in mutations.
+	EdgeQuotes = "quotes"
 	// Table holds the table name of the character in the database.
 	Table = "characters"
-	// MovieTable is the table that holds the movie relation/edge. The primary key declared below.
-	MovieTable = "movie_characters"
+	// MovieTable is the table that holds the movie relation/edge.
+	MovieTable = "characters"
 	// MovieInverseTable is the table name for the Movie entity.
 	// It exists in this package in order to avoid circular dependency with the "movie" package.
 	MovieInverseTable = "movies"
+	// MovieColumn is the table column denoting the movie relation/edge.
+	MovieColumn = "movie_characters"
+	// QuotesTable is the table that holds the quotes relation/edge.
+	QuotesTable = "movie_quotes"
+	// QuotesInverseTable is the table name for the MovieQuote entity.
+	// It exists in this package in order to avoid circular dependency with the "moviequote" package.
+	QuotesInverseTable = "movie_quotes"
+	// QuotesColumn is the table column denoting the quotes relation/edge.
+	QuotesColumn = "character_quotes"
 )
 
 // Columns holds all SQL columns for character fields.
@@ -42,16 +53,21 @@ var Columns = []string{
 	FieldActor,
 }
 
-var (
-	// MoviePrimaryKey and MovieColumn2 are the table columns denoting the
-	// primary key for the movie relation (M2M).
-	MoviePrimaryKey = []string{"movie_id", "character_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "characters"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"movie_characters",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -99,23 +115,37 @@ func ByActor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActor, opts...).ToFunc()
 }
 
-// ByMovieCount orders the results by movie count.
-func ByMovieCount(opts ...sql.OrderTermOption) OrderOption {
+// ByMovieField orders the results by movie field.
+func ByMovieField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newMovieStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newMovieStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByMovie orders the results by movie terms.
-func ByMovie(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByQuotesCount orders the results by quotes count.
+func ByQuotesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMovieStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborsCount(s, newQuotesStep(), opts...)
+	}
+}
+
+// ByQuotes orders the results by quotes terms.
+func ByQuotes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newQuotesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newMovieStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MovieInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, MovieTable, MoviePrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, MovieTable, MovieColumn),
+	)
+}
+func newQuotesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(QuotesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, QuotesTable, QuotesColumn),
 	)
 }

@@ -11,25 +11,15 @@ services:
       - db-data:/var/lib/postgresql/data/
       # - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql # SQL script for seeding db with data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready --host=localhost"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
 
-  db-test:
-    image: postgres:17-alpine
-    ports:
-      - 5444:5432
-    environment:
-      - POSTGRES_DB=testdb
-      - POSTGRES_USER=testuser
-      - POSTGRES_PASSWORD=testpass
-
 networks:
   db-network:
     driver: bridge
   
-
 volumes:
   db-data:

@@ -5,6 +5,7 @@ package ent
 import (
 	"api/ent/character"
 	"api/ent/movie"
+	"api/ent/moviequote"
 	"api/ent/predicate"
 	"context"
 	"database/sql/driver"
@@ -25,6 +26,8 @@ type CharacterQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Character
 	withMovie  *MovieQuery
+	withQuotes *MovieQuoteQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,7 +78,29 @@ func (cq *CharacterQuery) QueryMovie() *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(character.Table, character.FieldID, selector),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, character.MovieTable, character.MoviePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, character.MovieTable, character.MovieColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryQuotes chains the current query on the "quotes" edge.
+func (cq *CharacterQuery) QueryQuotes() *MovieQuoteQuery {
+	query := (&MovieQuoteClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(character.Table, character.FieldID, selector),
+			sqlgraph.To(moviequote.Table, moviequote.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, character.QuotesTable, character.QuotesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -276,6 +301,7 @@ func (cq *CharacterQuery) Clone() *CharacterQuery {
 		inters:     append([]Interceptor{}, cq.inters...),
 		predicates: append([]predicate.Character{}, cq.predicates...),
 		withMovie:  cq.withMovie.Clone(),
+		withQuotes: cq.withQuotes.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -290,6 +316,17 @@ func (cq *CharacterQuery) WithMovie(opts ...func(*MovieQuery)) *CharacterQuery {
 		opt(query)
 	}
 	cq.withMovie = query
+	return cq
+}
+
+// WithQuotes tells the query-builder to eager-load the nodes that are connected to
+// the "quotes" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CharacterQuery) WithQuotes(opts ...func(*MovieQuoteQuery)) *CharacterQuery {
+	query := (&MovieQuoteClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withQuotes = query
 	return cq
 }
 
@@ -370,11 +407,19 @@ func (cq *CharacterQuery) prepareQuery(ctx context.Context) error {
 func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Character, error) {
 	var (
 		nodes       = []*Character{}
+		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			cq.withMovie != nil,
+			cq.withQuotes != nil,
 		}
 	)
+	if cq.withMovie != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, character.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Character).scanValues(nil, columns)
 	}
@@ -394,9 +439,15 @@ func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ch
 		return nodes, nil
 	}
 	if query := cq.withMovie; query != nil {
-		if err := cq.loadMovie(ctx, query, nodes,
-			func(n *Character) { n.Edges.Movie = []*Movie{} },
-			func(n *Character, e *Movie) { n.Edges.Movie = append(n.Edges.Movie, e) }); err != nil {
+		if err := cq.loadMovie(ctx, query, nodes, nil,
+			func(n *Character, e *Movie) { n.Edges.Movie = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withQuotes; query != nil {
+		if err := cq.loadQuotes(ctx, query, nodes,
+			func(n *Character) { n.Edges.Quotes = []*MovieQuote{} },
+			func(n *Character, e *MovieQuote) { n.Edges.Quotes = append(n.Edges.Quotes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -404,63 +455,65 @@ func (cq *CharacterQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ch
 }
 
 func (cq *CharacterQuery) loadMovie(ctx context.Context, query *MovieQuery, nodes []*Character, init func(*Character), assign func(*Character, *Movie)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Character)
-	nids := make(map[int]map[*Character]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Character)
+	for i := range nodes {
+		if nodes[i].movie_characters == nil {
+			continue
 		}
+		fk := *nodes[i].movie_characters
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(character.MovieTable)
-		s.Join(joinT).On(s.C(movie.FieldID), joinT.C(character.MoviePrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(character.MoviePrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(character.MoviePrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Character]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Movie](ctx, query, qr, query.inters)
+	query.Where(movie.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "movie" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "movie_characters" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (cq *CharacterQuery) loadQuotes(ctx context.Context, query *MovieQuoteQuery, nodes []*Character, init func(*Character), assign func(*Character, *MovieQuote)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Character)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.MovieQuote(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(character.QuotesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.character_quotes
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "character_quotes" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "character_quotes" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

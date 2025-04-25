@@ -31,9 +31,14 @@ func (MovieQuote) Mixin() []ent.Mixin {
 // Edges of the MovieQuote i.e. relationships.
 func (MovieQuote) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("movies", Movie.Type).
+		edge.From("movie", Movie.Type).
 			Ref("quotes").
-			Unique(),
+			Unique().
+			Required(),
+		edge.From("character", Character.Type).
+			Ref("quotes").
+			Unique().
+			Required(),
 		edge.From("language", Language.Type).
 			Ref("quotes").
 			Unique(),

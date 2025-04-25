@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"api/ent/character"
 	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
@@ -20,13 +21,14 @@ import (
 // MovieQuoteQuery is the builder for querying MovieQuote entities.
 type MovieQuoteQuery struct {
 	config
-	ctx          *QueryContext
-	order        []moviequote.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.MovieQuote
-	withMovie    *MovieQuery
-	withLanguage *LanguageQuery
-	withFKs      bool
+	ctx           *QueryContext
+	order         []moviequote.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.MovieQuote
+	withMovie     *MovieQuery
+	withCharacter *CharacterQuery
+	withLanguage  *LanguageQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,6 +80,28 @@ func (mqq *MovieQuoteQuery) QueryMovie() *MovieQuery {
 			sqlgraph.From(moviequote.Table, moviequote.FieldID, selector),
 			sqlgraph.To(movie.Table, movie.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, moviequote.MovieTable, moviequote.MovieColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(mqq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCharacter chains the current query on the "character" edge.
+func (mqq *MovieQuoteQuery) QueryCharacter() *CharacterQuery {
+	query := (&CharacterClient{config: mqq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := mqq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := mqq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(moviequote.Table, moviequote.FieldID, selector),
+			sqlgraph.To(character.Table, character.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, moviequote.CharacterTable, moviequote.CharacterColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mqq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +318,14 @@ func (mqq *MovieQuoteQuery) Clone() *MovieQuoteQuery {
 		return nil
 	}
 	return &MovieQuoteQuery{
-		config:       mqq.config,
-		ctx:          mqq.ctx.Clone(),
-		order:        append([]moviequote.OrderOption{}, mqq.order...),
-		inters:       append([]Interceptor{}, mqq.inters...),
-		predicates:   append([]predicate.MovieQuote{}, mqq.predicates...),
-		withMovie:    mqq.withMovie.Clone(),
-		withLanguage: mqq.withLanguage.Clone(),
+		config:        mqq.config,
+		ctx:           mqq.ctx.Clone(),
+		order:         append([]moviequote.OrderOption{}, mqq.order...),
+		inters:        append([]Interceptor{}, mqq.inters...),
+		predicates:    append([]predicate.MovieQuote{}, mqq.predicates...),
+		withMovie:     mqq.withMovie.Clone(),
+		withCharacter: mqq.withCharacter.Clone(),
+		withLanguage:  mqq.withLanguage.Clone(),
 		// clone intermediate query.
 		sql:  mqq.sql.Clone(),
 		path: mqq.path,
@@ -315,6 +340,17 @@ func (mqq *MovieQuoteQuery) WithMovie(opts ...func(*MovieQuery)) *MovieQuoteQuer
 		opt(query)
 	}
 	mqq.withMovie = query
+	return mqq
+}
+
+// WithCharacter tells the query-builder to eager-load the nodes that are connected to
+// the "character" edge. The optional arguments are used to configure the query builder of the edge.
+func (mqq *MovieQuoteQuery) WithCharacter(opts ...func(*CharacterQuery)) *MovieQuoteQuery {
+	query := (&CharacterClient{config: mqq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	mqq.withCharacter = query
 	return mqq
 }
 
@@ -408,12 +444,13 @@ func (mqq *MovieQuoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes       = []*MovieQuote{}
 		withFKs     = mqq.withFKs
 		_spec       = mqq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			mqq.withMovie != nil,
+			mqq.withCharacter != nil,
 			mqq.withLanguage != nil,
 		}
 	)
-	if mqq.withMovie != nil || mqq.withLanguage != nil {
+	if mqq.withMovie != nil || mqq.withCharacter != nil || mqq.withLanguage != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -440,6 +477,12 @@ func (mqq *MovieQuoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if query := mqq.withMovie; query != nil {
 		if err := mqq.loadMovie(ctx, query, nodes, nil,
 			func(n *MovieQuote, e *Movie) { n.Edges.Movie = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := mqq.withCharacter; query != nil {
+		if err := mqq.loadCharacter(ctx, query, nodes, nil,
+			func(n *MovieQuote, e *Character) { n.Edges.Character = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -477,6 +520,38 @@ func (mqq *MovieQuoteQuery) loadMovie(ctx context.Context, query *MovieQuery, no
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "movie_quotes" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (mqq *MovieQuoteQuery) loadCharacter(ctx context.Context, query *CharacterQuery, nodes []*MovieQuote, init func(*MovieQuote), assign func(*MovieQuote, *Character)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*MovieQuote)
+	for i := range nodes {
+		if nodes[i].character_quotes == nil {
+			continue
+		}
+		fk := *nodes[i].character_quotes
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(character.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "character_quotes" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

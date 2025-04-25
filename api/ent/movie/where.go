@@ -265,7 +265,7 @@ func HasCategory() predicate.Movie {
 	return predicate.Movie(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, CategoryTable, CategoryPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, CategoryTable, CategoryColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -288,7 +288,7 @@ func HasCharacters() predicate.Movie {
 	return predicate.Movie(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, CharactersTable, CharactersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, CharactersTable, CharactersColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

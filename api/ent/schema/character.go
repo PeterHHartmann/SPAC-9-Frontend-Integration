@@ -32,7 +32,11 @@ func (Character) Mixin() []ent.Mixin {
 // Edges of the Character i.e. relationships.
 func (Character) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("movies", Movie.Type),
+		edge.From("movie", Movie.Type).
+			Ref("characters").
+			Unique().
+			Required(),
+		edge.To("quotes", MovieQuote.Type),
 	}
 }
 

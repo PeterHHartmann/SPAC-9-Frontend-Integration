@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"api/ent/character"
 	"api/ent/language"
 	"api/ent/movie"
 	"api/ent/moviequote"
@@ -29,21 +30,24 @@ type MovieQuote struct {
 	Context string `json:"context,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MovieQuoteQuery when eager-loading is set.
-	Edges           MovieQuoteEdges `json:"edges"`
-	language_quotes *int
-	movie_quotes    *int
-	selectValues    sql.SelectValues
+	Edges            MovieQuoteEdges `json:"edges"`
+	character_quotes *int
+	language_quotes  *int
+	movie_quotes     *int
+	selectValues     sql.SelectValues
 }
 
 // MovieQuoteEdges holds the relations/edges for other nodes in the graph.
 type MovieQuoteEdges struct {
 	// Movie holds the value of the movie edge.
 	Movie *Movie `json:"movie,omitempty"`
+	// Character holds the value of the character edge.
+	Character *Character `json:"character,omitempty"`
 	// Language holds the value of the language edge.
 	Language *Language `json:"language,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // MovieOrErr returns the Movie value or an error if the edge
@@ -57,12 +61,23 @@ func (e MovieQuoteEdges) MovieOrErr() (*Movie, error) {
 	return nil, &NotLoadedError{edge: "movie"}
 }
 
+// CharacterOrErr returns the Character value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MovieQuoteEdges) CharacterOrErr() (*Character, error) {
+	if e.Character != nil {
+		return e.Character, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: character.Label}
+	}
+	return nil, &NotLoadedError{edge: "character"}
+}
+
 // LanguageOrErr returns the Language value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MovieQuoteEdges) LanguageOrErr() (*Language, error) {
 	if e.Language != nil {
 		return e.Language, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: language.Label}
 	}
 	return nil, &NotLoadedError{edge: "language"}
@@ -79,9 +94,11 @@ func (*MovieQuote) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case moviequote.FieldCreatedAt, moviequote.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case moviequote.ForeignKeys[0]: // language_quotes
+		case moviequote.ForeignKeys[0]: // character_quotes
 			values[i] = new(sql.NullInt64)
-		case moviequote.ForeignKeys[1]: // movie_quotes
+		case moviequote.ForeignKeys[1]: // language_quotes
+			values[i] = new(sql.NullInt64)
+		case moviequote.ForeignKeys[2]: // movie_quotes
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -130,12 +147,19 @@ func (mq *MovieQuote) assignValues(columns []string, values []any) error {
 			}
 		case moviequote.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field character_quotes", value)
+			} else if value.Valid {
+				mq.character_quotes = new(int)
+				*mq.character_quotes = int(value.Int64)
+			}
+		case moviequote.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field language_quotes", value)
 			} else if value.Valid {
 				mq.language_quotes = new(int)
 				*mq.language_quotes = int(value.Int64)
 			}
-		case moviequote.ForeignKeys[1]:
+		case moviequote.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field movie_quotes", value)
 			} else if value.Valid {
@@ -158,6 +182,11 @@ func (mq *MovieQuote) Value(name string) (ent.Value, error) {
 // QueryMovie queries the "movie" edge of the MovieQuote entity.
 func (mq *MovieQuote) QueryMovie() *MovieQuery {
 	return NewMovieQuoteClient(mq.config).QueryMovie(mq)
+}
+
+// QueryCharacter queries the "character" edge of the MovieQuote entity.
+func (mq *MovieQuote) QueryCharacter() *CharacterQuery {
+	return NewMovieQuoteClient(mq.config).QueryCharacter(mq)
 }
 
 // QueryLanguage queries the "language" edge of the MovieQuote entity.
