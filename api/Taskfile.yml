@@ -3,7 +3,7 @@
 version: '3'
 
 tasks:
-  get:
+  install:
     cmds:
       - go get {{.package}}
     desc: Install go package
@@ -39,7 +39,7 @@ tasks:
     generates:
       - api/ent/*.go
 
-  ent:migrate:create:
+  migrate:create:
     dotenv: ["../.env.example"]
     cmds:
       - atlas migrate diff {{.CLI_ARGS}} --dir "{{.DIR}}" --to "{{.TO}}" --dev-url "{{.DEV_URL}}"
@@ -50,7 +50,7 @@ tasks:
 
     desc: Create database migration
   
-  ent:migrate:apply:
+  migrate:apply:
     dotenv: ["../.env.example"]
     cmds:
       - echo "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?search_path=public&sslmode=disable"
@@ -59,7 +59,7 @@ tasks:
       DIR: "file://ent/migrate/migrations"
       URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?search_path=public&sslmode=disable
   
-  ent:migrate:status:
+  migrate:status:
     dotenv: ["../.env.example"]
     cmds:
       - atlas migrate status --dir "{{.DIR}}" -u "{{.URL}}"
@@ -67,7 +67,7 @@ tasks:
       DIR: "file://ent/migrate/migrations"
       URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?search_path=public&sslmode=disable
   
-  ent:migrate:lint:
+  migrate:lint:
     dotenv: ["../.env.example"]
     cmds:
       - atlas migrate lint --dir "{{.DIR}}" --dev-url "{{.DEV_URL}}" --latest 1
