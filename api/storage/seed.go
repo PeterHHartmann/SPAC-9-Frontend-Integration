@@ -77,12 +77,12 @@ func Seed(ctx context.Context, client *ent.Client) error {
 }
 
 func getOrCreateCategory(q JsonMovieQuote, client *ent.Client, ctx context.Context) *ent.Category {
-	result, err := client.Category.
+	category, err := client.Category.
 		Query(). 
 		Where(category.NameEQ(q.Category)). 
 		Only(ctx) 
 	if err != nil {
-		result, err = client.Category. 
+		category, err = client.Category. 
 			Create(). 
 			SetName(q.Category). 
 			Save(ctx)
@@ -90,16 +90,16 @@ func getOrCreateCategory(q JsonMovieQuote, client *ent.Client, ctx context.Conte
 			log.Fatalf("Failed to create category: %v", err)
 		}
 	}
-	return result
+	return category
 }
 
 func getOrCreateLanguage(q JsonMovieQuote, client *ent.Client, ctx context.Context) *ent.Language {
-	result, err := client.Language.
+	language, err := client.Language.
 		Query().
 		Where(language.NameEQ(q.Language)).
 		Only(ctx)
 	if err != nil {
-		result, err = client.Language.
+		language, err = client.Language.
 			Create().
 			SetName(q.Language).
 			Save(ctx)
@@ -107,7 +107,7 @@ func getOrCreateLanguage(q JsonMovieQuote, client *ent.Client, ctx context.Conte
 			log.Fatalf("Failed to create Language: %v", err)
 		}
 	}
-	return result
+	return language
 }
 
 func getOrCreateMovie(q JsonMovieQuote, category *ent.Category, client *ent.Client, ctx context.Context) *ent.Movie {

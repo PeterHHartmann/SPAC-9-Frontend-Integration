@@ -4,35 +4,74 @@ import "google/protobuf/empty.proto";
 package quotes;
 option go_package = "proto/quotespb";
 
+service QuoteService {
+	rpc GetRandomQuote (google.protobuf.Empty) returns (Quote);
+	rpc GetQuotes (QuoteRequest) returns (QuoteList);
+	rpc CreateQuote (CreateQuoteRequest) returns (Quote);
+	rpc UpdateQuote (UpdateQuoteRequest) returns (Quote);
+	rpc DeleteQuote (DeleteQuoteRequest) returns (google.protobuf.Empty);
+}
+
 message QuoteRequest {
-	string movie = 1;
-	int32 decade = 2;
+	int32 id = 1;
+	string movie = 2;
+	int32 decade = 3;
 }
 
 message Character {
-	string name = 1;
-	string actor = 2;
+	int32 id = 1;
+	string name = 2;
+	string actor = 3;
 }
 
 message Movie {
-	string name = 1;
-	Character character = 2;
-	string category = 3;
-	int32 year = 4;
+	int32 id = 1;
+	string title = 2;
+	string category = 4;
+	int32 year = 5;
 }
 
 message Quote {
-	string quote = 1;
-	Movie movie = 2;
-	string context = 3;
-	string language = 4;
+	int32 id = 1;
+	string quote = 2;
+	Movie movie = 3;
+	Character character = 4;
+	string context = 5;
+	string language = 6;
 }
 
 message QuoteList {
 	repeated Quote quotes = 1;
 }
 
-service QuoteService {
-	rpc GetRandomQuote (google.protobuf.Empty) returns (Quote);
-	rpc GetQuotes (QuoteRequest) returns (QuoteList);
+message CreateMovieRequest {
+	string title = 1;
+	int32 year = 2;
+	string category = 3;
+}
+
+message CreateCharacterRequest {
+	string name = 1;
+	string actor = 2;
+}
+
+message CreateQuoteRequest {
+  string quote = 1;
+  string context = 2;
+  string language = 3;
+  CreateMovieRequest movie = 4;
+  CreateCharacterRequest character = 5;
+}
+
+message UpdateQuoteRequest {
+  int32 id = 1;
+  string quote = 2;
+  string context = 3;
+  string language = 4;
+  Character character = 5;
+  Movie movie = 6;
+}
+
+message DeleteQuoteRequest {
+  int32 id = 1;
 }
