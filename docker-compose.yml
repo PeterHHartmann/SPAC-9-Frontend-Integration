@@ -47,6 +47,18 @@ services:
     depends_on:
       - api
 
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile-client
+    ports:
+      - 5173:5173
+    volumes:
+      - ./client:/usr/src/client
+    networks:
+      - api-network
+    depends_on:
+      - envoy
 
 networks:
   postgres-network:

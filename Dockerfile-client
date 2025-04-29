@@ -1,0 +1,12 @@
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1 AS base
+WORKDIR /usr/src/client
+
+# install dependencies into temp directory
+# this will cache them and speed up future builds
+FROM base AS dev
+RUN mkdir -p /temp/dev
+COPY client/package.json client/bun.lock ./
+
+ENTRYPOINT [ "bun", "dev", "--host", "client" ]
