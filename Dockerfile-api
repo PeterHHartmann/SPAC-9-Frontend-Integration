@@ -3,6 +3,7 @@ FROM golang:1.24-alpine
 WORKDIR /app
 
 RUN go install github.com/air-verse/air@latest
+RUN go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
 COPY api/go.mod api/go.sum ./
 

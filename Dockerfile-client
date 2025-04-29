@@ -9,4 +9,4 @@ FROM base AS dev
 RUN mkdir -p /temp/dev
 COPY client/package.json client/bun.lock ./
 
-ENTRYPOINT [ "bun", "dev", "--host", "client" ]
+ENTRYPOINT [ "bun", "dev", "--host", "0.0.0.0" ]
