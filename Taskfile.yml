@@ -81,7 +81,7 @@ tasks:
 
   proto:gen:client:
     cmds:
-      - bun gen-proto
+      - bun proto-gen
     desc: Generate grpc client code
     dir: client
 

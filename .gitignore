@@ -61,5 +61,8 @@ nunit-*.xml
 # api
 api/tmp
 
+# client
+node_modules
+
 # taskfile.dev
 .task

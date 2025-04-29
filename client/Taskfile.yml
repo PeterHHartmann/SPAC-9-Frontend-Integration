@@ -6,6 +6,4 @@ tasks:
   dev:
     cmds:
       - bun dev
-  proto:
-    cmds:
-      - bun gen-proto
+    desc: run client in dev mode
