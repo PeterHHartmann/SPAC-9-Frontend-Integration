@@ -8,7 +8,6 @@ package quotespb
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -31,11 +30,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QuoteServiceClient interface {
-	GetRandomQuote(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Quote, error)
-	GetQuotes(ctx context.Context, in *QuoteRequest, opts ...grpc.CallOption) (*QuoteList, error)
+	GetRandomQuote(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Quote, error)
+	GetQuotes(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*QuoteList, error)
 	CreateQuote(ctx context.Context, in *CreateQuoteRequest, opts ...grpc.CallOption) (*Quote, error)
 	UpdateQuote(ctx context.Context, in *UpdateQuoteRequest, opts ...grpc.CallOption) (*Quote, error)
-	DeleteQuote(ctx context.Context, in *DeleteQuoteRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteQuote(ctx context.Context, in *DeleteQuoteRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type quoteServiceClient struct {
@@ -46,7 +45,7 @@ func NewQuoteServiceClient(cc grpc.ClientConnInterface) QuoteServiceClient {
 	return &quoteServiceClient{cc}
 }
 
-func (c *quoteServiceClient) GetRandomQuote(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Quote, error) {
+func (c *quoteServiceClient) GetRandomQuote(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Quote, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Quote)
 	err := c.cc.Invoke(ctx, QuoteService_GetRandomQuote_FullMethodName, in, out, cOpts...)
@@ -56,7 +55,7 @@ func (c *quoteServiceClient) GetRandomQuote(ctx context.Context, in *empty.Empty
 	return out, nil
 }
 
-func (c *quoteServiceClient) GetQuotes(ctx context.Context, in *QuoteRequest, opts ...grpc.CallOption) (*QuoteList, error) {
+func (c *quoteServiceClient) GetQuotes(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*QuoteList, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(QuoteList)
 	err := c.cc.Invoke(ctx, QuoteService_GetQuotes_FullMethodName, in, out, cOpts...)
@@ -86,9 +85,9 @@ func (c *quoteServiceClient) UpdateQuote(ctx context.Context, in *UpdateQuoteReq
 	return out, nil
 }
 
-func (c *quoteServiceClient) DeleteQuote(ctx context.Context, in *DeleteQuoteRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *quoteServiceClient) DeleteQuote(ctx context.Context, in *DeleteQuoteRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(empty.Empty)
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, QuoteService_DeleteQuote_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -100,11 +99,11 @@ func (c *quoteServiceClient) DeleteQuote(ctx context.Context, in *DeleteQuoteReq
 // All implementations must embed UnimplementedQuoteServiceServer
 // for forward compatibility.
 type QuoteServiceServer interface {
-	GetRandomQuote(context.Context, *empty.Empty) (*Quote, error)
-	GetQuotes(context.Context, *QuoteRequest) (*QuoteList, error)
+	GetRandomQuote(context.Context, *Empty) (*Quote, error)
+	GetQuotes(context.Context, *Empty) (*QuoteList, error)
 	CreateQuote(context.Context, *CreateQuoteRequest) (*Quote, error)
 	UpdateQuote(context.Context, *UpdateQuoteRequest) (*Quote, error)
-	DeleteQuote(context.Context, *DeleteQuoteRequest) (*empty.Empty, error)
+	DeleteQuote(context.Context, *DeleteQuoteRequest) (*Empty, error)
 	mustEmbedUnimplementedQuoteServiceServer()
 }
 
@@ -115,10 +114,10 @@ type QuoteServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedQuoteServiceServer struct{}
 
-func (UnimplementedQuoteServiceServer) GetRandomQuote(context.Context, *empty.Empty) (*Quote, error) {
+func (UnimplementedQuoteServiceServer) GetRandomQuote(context.Context, *Empty) (*Quote, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandomQuote not implemented")
 }
-func (UnimplementedQuoteServiceServer) GetQuotes(context.Context, *QuoteRequest) (*QuoteList, error) {
+func (UnimplementedQuoteServiceServer) GetQuotes(context.Context, *Empty) (*QuoteList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQuotes not implemented")
 }
 func (UnimplementedQuoteServiceServer) CreateQuote(context.Context, *CreateQuoteRequest) (*Quote, error) {
@@ -127,7 +126,7 @@ func (UnimplementedQuoteServiceServer) CreateQuote(context.Context, *CreateQuote
 func (UnimplementedQuoteServiceServer) UpdateQuote(context.Context, *UpdateQuoteRequest) (*Quote, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateQuote not implemented")
 }
-func (UnimplementedQuoteServiceServer) DeleteQuote(context.Context, *DeleteQuoteRequest) (*empty.Empty, error) {
+func (UnimplementedQuoteServiceServer) DeleteQuote(context.Context, *DeleteQuoteRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteQuote not implemented")
 }
 func (UnimplementedQuoteServiceServer) mustEmbedUnimplementedQuoteServiceServer() {}
@@ -152,7 +151,7 @@ func RegisterQuoteServiceServer(s grpc.ServiceRegistrar, srv QuoteServiceServer)
 }
 
 func _QuoteService_GetRandomQuote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -164,13 +163,13 @@ func _QuoteService_GetRandomQuote_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: QuoteService_GetRandomQuote_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QuoteServiceServer).GetRandomQuote(ctx, req.(*empty.Empty))
+		return srv.(QuoteServiceServer).GetRandomQuote(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _QuoteService_GetQuotes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuoteRequest)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -182,7 +181,7 @@ func _QuoteService_GetQuotes_Handler(srv interface{}, ctx context.Context, dec f
 		FullMethod: QuoteService_GetQuotes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QuoteServiceServer).GetQuotes(ctx, req.(*QuoteRequest))
+		return srv.(QuoteServiceServer).GetQuotes(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

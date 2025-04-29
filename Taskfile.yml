@@ -4,61 +4,93 @@ version: '3'
 
 vars:
   GREETING: Hello, World!
+
+env:
   COMPOSE_BAKE: true
+
 
 tasks:
   default:
     cmds:
       - echo "{{.GREETING}}"
     silent: true
+
   compose:build:
     cmds:
       - docker compose build {{.CLI_ARGS}}
+    desc: "build docker compose services \
+          (append: -- <SERVICE NAME> for single container)"
+
   compose:up:
       cmds:
+      - docker compose up {{.CLI_ARGS}}
+      desc: "run docker compose services \
+            (append: -- <SERVICE NAME> for single container)"
+
+  compose:up-d:
+      cmds:
       - docker compose up -d {{.CLI_ARGS}}
-  compose:start:
-    cmds:
-      - docker compose start {{.CLI_ARGS}}
+      desc: "run docker compose services in detached mode \
+            (append: -- <SERVICE NAME> for single container)"
+
   compose:down:
     cmds:
       - docker compose down {{.CLI_ARGS}}
+    desc: "stop docker compose services \
+          (append: -- <SERVICE NAME> for single container)"
+
   compose:destroy:
     cmds:
       - docker compose down -v {{.CLI_ARGS}}
-  compose:stop:
-    cmds:
-      - docker compose stop {{.CLI_ARGS}}
+    desc: "start docker compose services and attached volumes  \
+          (append: -- <SERVICE NAME> for single container)"
+
   compose:restart:
     cmds: 
       - docker compose stop {{.CLI_ARGS}}
       - docker compose up -d {{.CLI_ARGS}}
+    desc: "restart docker compose services \
+          (append: -- <SERVICE NAME> for single container)"
+
+  compose:restart-d:
+    cmds: 
+      - docker compose stop {{.CLI_ARGS}}
+      - docker compose up -d {{.CLI_ARGS}}
+    desc: "restart docker compose services in detached mode \
+          (append: -- <SERVICE NAME> for single container)"
+
   compose:config:
     cmds:
       - docker compose config {{.CLI_ARGS}}
+    desc: output config of docker compose schema
+
   compose:cache:clean:
     cmds:
-      - docker buildx prune
-  compose:bake:
-    cmds:
-      - docker buildx bake
-  compose:bake:load:
-    cmds:
-      - docker buildx bake --load
-  compose:bake:push:
-    cmds:
-      - docker buildx bake --push
+      - docker buildx prune --force --verbose
+    desc: prune docker build cache
+    interactive: true
 
-  proto:gen:
+  proto:gen:api:
     cmds:
       - protoc --proto_path="{{.PROTO_PATH}}" --go_out="{{.GO_OUT}}" --go-grpc_out="{{.GO_GRPC_OUT}}" "proto/quotes.proto"
     vars:
       PROTO_PATH: "proto"
       GO_OUT: "api"
       GO_GRPC_OUT: "api"
-    desc: Generate protobuf go code
+    desc: Generate grpc api code
+
+  proto:gen:client:
+    cmds:
+      - bun gen-proto
+    desc: Generate grpc client code
+    dir: client
+
 
 includes:
   api: 
     taskfile: api/Taskfile.yml
     dir: api
+
+  client:
+    taskfile: client/Taskfile.yml
+    dir: client

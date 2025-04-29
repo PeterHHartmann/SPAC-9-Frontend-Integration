@@ -1,16 +1,17 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
 package quotes;
 option go_package = "proto/quotespb";
 
 service QuoteService {
-	rpc GetRandomQuote (google.protobuf.Empty) returns (Quote);
-	rpc GetQuotes (QuoteRequest) returns (QuoteList);
+	rpc GetRandomQuote (Empty) returns (Quote);
+	rpc GetQuotes (Empty) returns (QuoteList);
 	rpc CreateQuote (CreateQuoteRequest) returns (Quote);
 	rpc UpdateQuote (UpdateQuoteRequest) returns (Quote);
-	rpc DeleteQuote (DeleteQuoteRequest) returns (google.protobuf.Empty);
+	rpc DeleteQuote (DeleteQuoteRequest) returns (Empty);
 }
+
+message Empty {}
 
 message QuoteRequest {
 	int32 id = 1;

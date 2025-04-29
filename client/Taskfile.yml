@@ -1,0 +1,11 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  dev:
+    cmds:
+      - bun dev
+  proto:
+    cmds:
+      - bun gen-proto

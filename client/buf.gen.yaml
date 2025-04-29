@@ -1,0 +1,10 @@
+version: v2 # migration from v1 guide: https://github.com/connectrpc/connect-es/blob/main/MIGRATING.md
+inputs:
+  - directory: ../proto
+
+clean: true
+plugins:
+  - local: protoc-gen-es # This plugin is called by buf, used to compile proto files into TS code
+    opt: target=ts # Indicates we want to generate TS code
+    out: src/proto/gen # Directory where generated code is stored
+    include_imports: true

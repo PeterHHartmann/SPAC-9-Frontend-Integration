@@ -55,5 +55,11 @@ nunit-*.xml
 
 # Environment variable files
 .env
+.env.dev
 .env.production
 
+# api
+api/tmp
+
+# taskfile.dev
+.task

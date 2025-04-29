@@ -1,0 +1,9 @@
+FROM alpine:3.21.3 AS build
+WORKDIR /app
+RUN apk add --no-cache protoc
+COPY ./proto/quotes.proto .
+# build proto descriptor
+RUN protoc --include_source_info --descriptor_set_out=quotes.pb quotes.proto
+
+FROM envoyproxy/envoy:v1.22.0 AS runner
+COPY --from=build /app/quotes.pb /tmp/

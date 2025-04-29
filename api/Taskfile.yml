@@ -15,7 +15,7 @@ tasks:
 
   run:
     cmds:
-      - go run .
+      - air
     desc: Start the api server
 
   tidy:
@@ -36,8 +36,8 @@ tasks:
     cmds:
       - go generate .
     desc: Generate database models based on ent schema
-    generates:
-      - api/ent/*.go
+    sources: ["ent/schema/*.go"]
+    generates: ["ent/*.go", "ent/**/.go"]
 
   migrate:create:
     dotenv: ["../.env.example"]

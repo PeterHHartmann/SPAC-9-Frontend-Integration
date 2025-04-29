@@ -17,7 +17,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type quoteServer struct {
@@ -29,7 +28,7 @@ func NewQuoteServer(client *ent.Client) *quoteServer {
 	return &quoteServer{client: client}
 }
 
-func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*quotespb.Quote, error) {
+func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *quotespb.Empty) (*quotespb.Quote, error) {
 	// Use the SQL query to order by random in PostgreSQL
 	q, err := s.client.MovieQuote.Query().
 		WithMovie(func(q *ent.MovieQuery) {
@@ -61,7 +60,7 @@ func (s *quoteServer) GetRandomQuote(ctx context.Context, _ *emptypb.Empty) (*qu
 	}, nil
 }
 
-func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.QuoteRequest) (*quotespb.QuoteList, error) {
+func (s *quoteServer) GetQuotes(ctx context.Context, req *quotespb.Empty) (*quotespb.QuoteList, error) {
 	quotes, err := s.client.MovieQuote.Query().
 		WithMovie(func(q *ent.MovieQuery) {
 			q.WithCategory()

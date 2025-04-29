@@ -1,25 +1,58 @@
 services:
-  db:
+  postgres:
     image: postgres:latest
     ports:
       - 5432:5432
     env_file:
-      - .env.${DEV_ENV:-example}
+      - .env.${APP_ENV:-dev}
     networks:
-      - db-network
+      - postgres-network
     volumes:
-      - db-data:/var/lib/postgresql/data/
-      # - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql # SQL script for seeding db with data
+      - postgres-data:/var/lib/postgresql/data/
+      # - ./data/init.sql:/docker-entrypoint-initdb.d/init.sql # SQL script for seeding postgres with data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile-api
+    ports:
+      - 50051:50051
+    volumes:
+      - ./api:/app
+      - .env.${APP_ENV:-dev}:/.env.${APP_ENV:-dev}
+    networks:
+      - postgres-network
+      - api-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+
+  envoy:
+    build:
+      context: .
+      dockerfile: Dockerfile-envoy
+    ports:
+      - 8000:8000
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    networks:
+      - api-network
+    depends_on:
+      - api
+
+
 networks:
-  db-network:
+  postgres-network:
     driver: bridge
-  
+  api-network:
+    driver: bridge
+
 volumes:
-  db-data:
+  postgres-data:

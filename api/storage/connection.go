@@ -19,11 +19,11 @@ func getEnv(key, fallback string) string {
 
 //Gets connectionString for database from .env file or return default
 func GetConnectionString() string {
-	devenv := getEnv("DEV_ENV", "example")
+	appEnv := getEnv("APP_ENV", "dev")
 
 	env_file := fmt.Sprintf(
 		"./../.env.%s",
-		devenv,
+		appEnv,
 	)
 
 	err := godotenv.Load(env_file)
