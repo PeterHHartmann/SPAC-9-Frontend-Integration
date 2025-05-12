@@ -15,6 +15,12 @@ tasks:
       - echo "{{.GREETING}}"
     silent: true
 
+  app:run:
+    cmds:
+      - docker compose up {{.CLI_ARGS}}
+    desc: "run docker compose services \
+          (append: -- <SERVICE NAME> for single container)"
+
   compose:build:
     cmds:
       - docker compose build {{.CLI_ARGS}}
