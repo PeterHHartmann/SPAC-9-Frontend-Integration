@@ -1,7 +1,7 @@
 # SPAC - Week 9 - Frontend-Integration
 An exercise in integrating a frontend with an API.
 
-## Description:
+## Description
 For this project i have chosen to develop a simple full stack application serving quotes from movie with data about the movies, actors, movie characters, etc.  
 
 The backend is development using [Go](https://go.dev/) with PostgreSQL as the database for persisting data.
@@ -32,10 +32,22 @@ a mono-repo containing multiple elements of the overall application. Those eleme
 - [Go v1.24.2](https://go.dev/)
 - [Bun v1.2.4](https://bun.sh/)
 
-## Try It Out
-1. Ensure docker is installed and that the docker daemon is running.  
+## Get Started
+1. Install client dependencies:
+```sh
+bun install --cwd ./client
+```
+2. Create an environment variable file. In the project there is included a file named __.env.example__ simple create a copy of it named __.env.dev__
+2. Ensure docker is installed and that the docker daemon is running.  
 *Getting the daemon running depends on the your environment. On Windows machines it's usually done by starting the Docker Desktop application*
-2. Start the application by running:
+3. Start the application by running:
 ```sh
 docker compose up
 ```
+Or if you have [Task](https://taskfile.dev/) installed
+```sh
+task compose:up
+```
+4. App should now be up and running.  
+5. You should be able to view the client here: [localhost:5173](http://localhost:5173/)  
+Note: *If you want to manually try out requests to the gRPC server you will need a client if gRPC support like [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/downloads/). The gRPC server should be available on [localhost:50051](http://localhost:50051)*
