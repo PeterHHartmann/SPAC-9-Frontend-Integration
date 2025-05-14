@@ -1,6 +1,8 @@
 # SPAC - Week 9 - Frontend-Integration
 An exercise in integrating a frontend with an API.
 
+![readme hero](./docs/readme-hero.png)
+
 ## Description
 For this project i have chosen to develop a simple full stack application serving quotes from movie with data about the movies, actors, movie characters, etc.  
 
